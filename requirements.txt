@@ -1,3 +1,6 @@
 pandas
 PyMuPDF
 textract
+resend
+pathlib
+dotenv
