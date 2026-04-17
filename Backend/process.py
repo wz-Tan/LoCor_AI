@@ -8,53 +8,56 @@ import textract
 def initialise_data(
     description_file=None, inventory_sheet=None, sales_sheet=None, balance_sheet=None
 ):
-    company_description = ""
-    inventory_data = None
-    sales_data = None
-    balance_sheet_data = None
+    try:
+        company_description = ""
+        inventory_data = None
+        sales_data = None
+        balance_sheet_data = None
 
-    # Extract Company Description
-    if description_file:
-        ext = description_file.name.split(".")[-1].lower()
-        if ext == "pdf":
-            company_description = extract_from_pdf(description_file)
-        elif ext in ["doc", "docx"]:
-            company_description = extract_from_doc(description_file)
-        else:
-            return
+        # Extract Company Description
+        if description_file:
+            ext = description_file.name.split(".")[-1].lower()
+            if ext == "pdf":
+                company_description = extract_from_pdf(description_file)
+            elif ext in ["doc", "docx"]:
+                company_description = extract_from_doc(description_file)
+            else:
+                return
 
-    # Inventory Sheet
-    if inventory_sheet:
-        ext = inventory_sheet.name.split(".")[-1].lower()
-        if ext == "csv":
-            inventory_data = pd.read_csv(inventory_sheet)
-        elif ext in ["xls", "xlsx"]:
-            inventory_data = pd.read_excel(inventory_sheet)
-        else:
-            return
+        # Inventory Sheet
+        if inventory_sheet:
+            ext = inventory_sheet.name.split(".")[-1].lower()
+            if ext == "csv":
+                inventory_data = pd.read_csv(inventory_sheet)
+            elif ext in ["xls", "xlsx"]:
+                inventory_data = pd.read_excel(inventory_sheet)
+            else:
+                return
 
-    # Sales Sheet
-    if sales_sheet:
-        ext = sales_sheet.name.split(".")[-1].lower()
-        if ext == "csv":
-            sales_data = pd.read_csv(sales_sheet)
-        elif ext in ["xls", "xlsx"]:
-            sales_data = pd.read_excel(sales_sheet)
-        else:
-            return
+        # Sales Sheet
+        if sales_sheet:
+            ext = sales_sheet.name.split(".")[-1].lower()
+            if ext == "csv":
+                sales_data = pd.read_csv(sales_sheet)
+            elif ext in ["xls", "xlsx"]:
+                sales_data = pd.read_excel(sales_sheet)
+            else:
+                return
 
-    # Balance Sheet
-    if balance_sheet:
-        ext = balance_sheet.name.split(".")[-1].lower()
-        if ext == "csv":
-            balance_sheet_data = pd.read_csv(balance_sheet)
-        elif ext in ["xls", "xlsx"]:
-            balance_sheet_data = pd.read_excel(balance_sheet)
-        else:
-            return
+        # Balance Sheet
+        if balance_sheet:
+            ext = balance_sheet.name.split(".")[-1].lower()
+            if ext == "csv":
+                balance_sheet_data = pd.read_csv(balance_sheet)
+            elif ext in ["xls", "xlsx"]:
+                balance_sheet_data = pd.read_excel(balance_sheet)
+            else:
+                return
 
-    # TODO: Pass This Into Pinecone
-    return company_description, inventory_data, sales_data, balance_sheet_data
+        # TODO: Pass This Into Pinecone
+        return company_description, inventory_data, sales_data, balance_sheet_data
+    except Exception as e:
+        print("Error initialising data ", e)
 
 
 # Word Processing

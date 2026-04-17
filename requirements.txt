@@ -1,5 +1,6 @@
 pandas
 PyMuPDF
 textract
-mailtrap
+resend
 pathlib
+dotenv
