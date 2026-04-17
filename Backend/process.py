@@ -53,16 +53,21 @@ def initialise_data(
         else:
             return
 
+    # TODO: Pass This Into Pinecone
     return company_description, inventory_data, sales_data, balance_sheet_data
 
 
 # Word Processing
+
+
 def extract_from_doc(file_path):
     text = textract.process(file_path)
     return text.decode("utf-8")
 
 
 # PDF Processing
+
+
 def extract_from_pdf(file_path):
     doc = fitz.open(file_path)
     full_text = ""
