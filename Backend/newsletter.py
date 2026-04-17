@@ -16,7 +16,7 @@ def decode_attachment(filepath):
     return f
 
 
-# Send Email to User (TODO: Add attachments into email)
+# Send Email to User
 def send_email(report, spreadsheet):
     report = decode_attachment("./Sample_WordFile.docx")
     spreadsheet = decode_attachment("./Sample_Spreadsheet.xlsx")
