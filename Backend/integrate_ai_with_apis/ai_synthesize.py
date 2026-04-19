@@ -1,5 +1,5 @@
 import json
-from zai import ZaiClient
+from zai import ZaiClient   # type: ignore
 import os
 
 client = ZaiClient(api_key=os.getenv('Z_AI_API_KEY'))

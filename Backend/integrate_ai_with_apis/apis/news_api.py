@@ -6,10 +6,24 @@ async def fetch_trends() -> dict:
         host='news-api14.p.rapidapi.com',
         params={
             'topic': 'General',
-            'limit': '10'
+            'language': 'en',
+            'limit': '2'
         }
     )
+
+    # Remove unwanted fields
+    items = data.get('data', {})
+
+    normalized = []
+    for item in items:
+        normalized.append({
+            'title':     item.get('title', ''),
+            'excerpt':   item.get('excerpt', ''),
+            'publisher': item.get('publisher', {}).get('name', ''),
+            'keywords':  item.get('keywords', []),
+        })
+
     return {
         'platform': 'News',
-        'data': data
+        'trends': normalized
     }

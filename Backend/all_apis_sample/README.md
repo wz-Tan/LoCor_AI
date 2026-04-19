@@ -22,6 +22,7 @@ https://rapidapi.com/ytjar/api/yt-api
 https://rapidapi.com/tikwm-tikwm-default/api/tiktok-scraper7
 
 3. tiktok_api_2.py
+## SHIT
 100/day
 https://rapidapi.com/ponds4552/api/tiktok-best-experience
 
@@ -33,12 +34,8 @@ https://rapidapi.com/bonaipowered/api/news-api14
 500/month
 https://rapidapi.com/llbbmm/api/tiktok-download5
 
-6. youtube_api_2.py
-20/day
-https://rapidapi.com/pyuser/api/youtube-trending
-
-7. twitter_api.py
+6. twitter_api.py
 500/month
 https://rapidapi.com/mdakram09/api/trending-twitter-hashtags
 
-8. Add more pls (if got)
+7. Add more pls (if got)
