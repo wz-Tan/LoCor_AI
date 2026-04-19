@@ -11,7 +11,7 @@ url = "https://news-api14.p.rapidapi.com/v2/trendings"
 # limit (Default = 0)
 
 headers = {
-	"x-rapidapi-key": os.getenv('API_KEY'),
+	"x-rapidapi-key": os.getenv("RAPIDAPI_API_KEY"),
 	"x-rapidapi-host": "news-api14.p.rapidapi.com",
 	"Content-Type": "application/json"
 }

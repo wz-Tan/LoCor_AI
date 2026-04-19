@@ -9,7 +9,7 @@ url = "https://tiktok-download5.p.rapidapi.com/feedList"
 querystring = {"region":"US","count":"50"}
 
 headers = {
-	"x-rapidapi-key": os.getenv('API_KEY'),
+	"x-rapidapi-key": os.getenv("RAPIDAPI_API_KEY"),
 	"x-rapidapi-host": "tiktok-download5.p.rapidapi.com",
 	"Content-Type": "application/json"
 }

@@ -9,7 +9,7 @@ url = "https://yt-api.p.rapidapi.com/trending"
 querystring = {"geo":"US","type":"now"}
 
 headers = {
-	"x-rapidapi-key": os.getenv('API_KEY'),
+	"x-rapidapi-key": os.getenv("RAPIDAPI_API_KEY"),
 	"x-rapidapi-host": "yt-api.p.rapidapi.com",
 	"Content-Type": "application/json"
 }
