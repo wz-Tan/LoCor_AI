@@ -7,13 +7,12 @@ async def fetch_trends() -> dict:
         params={
             'topic': 'General',
             'language': 'en',
-            'limit': '2'
+            'limit': '20'
         }
     )
 
-    # Remove unwanted fields
+    # Filter fields
     items = data.get('data', {})
-
     normalized = []
     for item in items:
         normalized.append({

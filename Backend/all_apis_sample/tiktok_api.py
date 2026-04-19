@@ -4,10 +4,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-url = "https://tiktok-scraper7.p.rapidapi.com/feed/list"
+url = "https://tiktok-scraper7.p.rapidapi.com/ads/trends/videos"
 
 # Max 20
-querystring = {"region":"us","count":"20"}
+querystring = {'page': '1',"limit":"20", 'period': '30'}
 
 headers = {
 	"x-rapidapi-key": os.getenv("RAPIDAPI_API_KEY"),

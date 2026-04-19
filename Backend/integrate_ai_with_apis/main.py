@@ -3,13 +3,16 @@ from dotenv import load_dotenv
 load_dotenv()
 
 from apis.news_api import fetch_trends as news_trends
-# from apis.tiktok_api_2 import fetch_trends as tiktok_trends
+from apis.youtube_api import fetch_trends as youtube_trends
+from apis.tiktok_api_3 import fetch_trends as tiktok_trends
 
 from ai_synthesize import synthesize_trends
 
 async def fetch_all():
     results = await asyncio.gather(
         news_trends(),
+        youtube_trends(),
+        tiktok_trends(),
         return_exceptions=True   # Don't let one failure kill the rest
     )
 
@@ -28,7 +31,7 @@ async def main(testing):
     if testing:
         import json
         result = await asyncio.gather(
-            news_trends(),
+            tiktok_trends(),    # Change to the one u want to test
             return_exceptions=True
         )
         print(json.dumps(result, indent=2))
@@ -45,4 +48,4 @@ async def main(testing):
     print(summary)
 
 if __name__ == "__main__":
-    asyncio.run(main(testing=True))
+    asyncio.run(main(testing=False))

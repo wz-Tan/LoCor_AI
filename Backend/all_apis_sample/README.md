@@ -18,6 +18,7 @@ How to Add New API?
 https://rapidapi.com/ytjar/api/yt-api
 
 2. tiktok_api.py
+## Server error last time i see
 300/month
 https://rapidapi.com/tikwm-tikwm-default/api/tiktok-scraper7
 
@@ -34,8 +35,4 @@ https://rapidapi.com/bonaipowered/api/news-api14
 500/month
 https://rapidapi.com/llbbmm/api/tiktok-download5
 
-6. twitter_api.py
-500/month
-https://rapidapi.com/mdakram09/api/trending-twitter-hashtags
-
-7. Add more pls (if got)
+6. Add more pls (if got)
