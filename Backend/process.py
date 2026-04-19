@@ -1,4 +1,8 @@
 # Module to handle files, and run pandas
+import io
+import json
+
+import docx
 import fitz
 import pandas as pd
 import textract
@@ -60,7 +64,7 @@ def initialise_data(
         print("Error initialising data ", e)
 
 
-# Word Processing
+# Read
 
 
 def extract_from_doc(file_path):
@@ -77,3 +81,32 @@ def extract_from_pdf(file_path):
     for page in doc:
         full_text += page.get_text()
     return full_text
+
+
+# Write
+def generate_doc(contents):
+    doc = docx.Document()
+    doc.add_paragraph(contents)
+
+    # Save as Bytes
+    buffer = io.BytesIO()
+    doc.save(buffer)
+    buffer.seek(0)
+
+    return buffer
+
+
+# Pass in JSON String from the AI
+def generate_excel(content):
+    data = json.loads(content)
+    df = pd.DataFrame(data)
+
+    # Write into Memory, Return as Bytes
+    buffer = io.BytesIO()
+
+    with pd.ExcelWriter(buffer, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False)
+
+    buffer.seek(0)
+
+    return buffer
