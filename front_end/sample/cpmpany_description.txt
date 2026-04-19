@@ -1,0 +1,7 @@
+Company: Ahmad's Hardware Store
+Location: Kuala Lumpur, Malaysia
+Industry: Retail Hardware
+Products: Tools, construction materials, home improvement supplies
+Monthly Revenue: RM 45,000
+Staff: 8 employees
+Founded: 2015
