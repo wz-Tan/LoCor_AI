@@ -22,17 +22,12 @@ https://rapidapi.com/ytjar/api/yt-api
 300/month
 https://rapidapi.com/tikwm-tikwm-default/api/tiktok-scraper7
 
-3. tiktok_api_2.py
-## SHIT
-100/day
-https://rapidapi.com/ponds4552/api/tiktok-best-experience
-
-4. news_api.py
+3. news_api.py
 100/day
 https://rapidapi.com/bonaipowered/api/news-api14
 
-5. tiktok_api_3.py
+4. tiktok_api_3.py
 500/month
 https://rapidapi.com/llbbmm/api/tiktok-download5
 
-6. Add more pls (if got)
+5. Add more pls (if got)
