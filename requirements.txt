@@ -4,3 +4,4 @@ textract
 resend
 pathlib
 dotenv
+requests
