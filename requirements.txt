@@ -5,3 +5,4 @@ resend
 pathlib
 dotenv
 requests
+zai-sdk
