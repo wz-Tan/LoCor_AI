@@ -7,7 +7,7 @@ load_dotenv()
 url = "https://tiktok-best-experience.p.rapidapi.com/trending"
 
 headers = {
-	"x-rapidapi-key": os.getenv('API_KEY'),
+	"x-rapidapi-key": os.getenv("RAPIDAPI_API_KEY"),
 	"x-rapidapi-host": "tiktok-best-experience.p.rapidapi.com",
 	"Content-Type": "application/json"
 }

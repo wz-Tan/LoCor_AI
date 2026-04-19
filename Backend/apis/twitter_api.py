@@ -7,7 +7,7 @@ load_dotenv()
 url = "https://trending-twitter-hashtags.p.rapidapi.com/getTrendingTwitterHashtags"
 
 headers = {
-	"x-rapidapi-key": os.getenv('API_KEY'),
+	"x-rapidapi-key": os.getenv("RAPIDAPI_API_KEY"),
 	"x-rapidapi-host": "trending-twitter-hashtags.p.rapidapi.com",
 	"Content-Type": "application/json"
 }
