@@ -2,8 +2,8 @@ from .base import fetch_api
 
 async def fetch_trends() -> dict:
     data = await fetch_api(
-        url='https://tiktok-download5.p.rapidapi.com/feedList',
         host='tiktok-download5.p.rapidapi.com',
+        endpoint='/feedList',
         params={
             'region': 'US',
             'count': '20'
