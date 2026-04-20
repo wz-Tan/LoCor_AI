@@ -2,8 +2,8 @@
 import os
 
 import dotenv
-import process
 import resend
+from pandas.io.common import BytesIO
 
 # Initialise Environment
 dotenv.load_dotenv()
@@ -13,7 +13,8 @@ email_address = os.getenv("EMAIL")
 
 
 # Send Email to User
-def send_email(reportBuffer, spreadsheetBuffer):
+def send_email(reportBuffer: BytesIO, spreadsheetBuffer: BytesIO):
+    """Send Email to User with Attachments after Generating Word and Excel File"""
     report = reportBuffer.read()
     spreadsheet = spreadsheetBuffer.read()
 
@@ -38,10 +39,3 @@ def send_email(reportBuffer, spreadsheetBuffer):
 
     email = resend.Emails.send(params)
     print(email)
-
-
-word_buffer = process.generate_doc("This is some text")
-excel_buffer = process.generate_excel(
-    """[{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]"""
-)
-send_email(word_buffer, excel_buffer)

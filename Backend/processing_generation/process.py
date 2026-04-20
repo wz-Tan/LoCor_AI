@@ -68,6 +68,7 @@ def initialise_data(
 
 
 def extract_from_doc(file_path):
+    """Extract Text from Word File"""
     text = textract.process(file_path)
     return text.decode("utf-8")
 
@@ -76,6 +77,7 @@ def extract_from_doc(file_path):
 
 
 def extract_from_pdf(file_path):
+    """Extract Text from PDF"""
     doc = fitz.open(file_path)
     full_text = ""
     for page in doc:
@@ -85,6 +87,8 @@ def extract_from_pdf(file_path):
 
 # Write
 def generate_doc(contents):
+    print("Word File Contents are ", contents)
+    """Fill Data into Word File"""
     doc = docx.Document()
     doc.add_paragraph(contents)
 
@@ -97,8 +101,11 @@ def generate_doc(contents):
 
 
 # Pass in JSON String from the AI
-def generate_excel(content):
-    data = json.loads(content)
+def generate_excel(contents):
+    print("Input content on excel is ", contents)
+
+    """Fill Data into Excel File"""
+    data = json.loads(contents)
     df = pd.DataFrame(data)
 
     # Write into Memory, Return as Bytes

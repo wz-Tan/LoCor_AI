@@ -2,10 +2,10 @@ from .base import fetch_api
 
 async def fetch_trends() -> dict:
     data = await fetch_api(
-        url='https://yt-api.p.rapidapi.com/trending',
         host='yt-api.p.rapidapi.com',
+        endpoint='/trending',
         params={
-            'geo': 'US',
+            'geo': 'MY',
             'type': 'now'
         }
     )

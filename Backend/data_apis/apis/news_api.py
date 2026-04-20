@@ -2,11 +2,12 @@ from .base import fetch_api
 
 async def fetch_trends() -> dict:
     data = await fetch_api(
-        url='https://news-api14.p.rapidapi.com/v2/trendings',
         host='news-api14.p.rapidapi.com',
+        endpoint='/v2/trendings',
         params={
             'topic': 'General',
             'language': 'en',
+            'country': 'MY',
             'limit': '20'
         }
     )

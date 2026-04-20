@@ -1,18 +1,20 @@
 import json
-from zai import ZaiClient   # type: ignore
 import os
 
-client = ZaiClient(api_key=os.getenv('Z_AI_API_KEY'))
+from zai import ZaiClient  # type: ignore
 
-def synthesize_trends(all_platform_data: list[dict]) -> str:
+client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
+
+
+def summarise_trends(all_platform_data: list[dict]) -> str:
     # Build a compact summary string per platform
-    platforms_text = ''
+    platforms_text = ""
     for platform_data in all_platform_data:
-        platforms_text += f'\n\n### {platform_data['platform']}\n'
-        for i, trend in enumerate(platform_data.get('trends', [])[:15], 1):
-            platforms_text += f'{i}. {json.dumps(trend)}\n'
+        platforms_text += f"\n\n### {platform_data['platform']}\n"
+        for i, trend in enumerate(platform_data.get("trends", [])[:15], 1):
+            platforms_text += f"{i}. {json.dumps(trend)}\n"
 
-    prompt = f'''
+    prompt = f"""
 You are a strategic business intelligence analyst. Below is real-time trending content scraped from multiple platforms.
 
 {platforms_text}
@@ -33,13 +35,24 @@ Provide:
 4. **Content Strategy Recommendations** — What should businesses be posting about this week to stay relevant?
 
 Be specific and actionable. Avoid generic advice. Reference actual topics, hashtags, and publishers from the data.
-'''
+"""
 
     response = client.chat.completions.create(
-        model='glm-4.7-flash',
+        model='glm-4.5-flash',
         messages=[{'role': 'user', 'content': prompt}],
-        thinking={'type': 'disabled'},  # faster, no need for deep thinking here
-        max_tokens=2048,
+        thinking={'type': 'disabled'},
+        max_tokens=1000,
         temperature=0.5,
+        stream=True
     )
-    return response.choices[0].message.content
+
+    # Print stream by stream
+    result = ''
+    for chunk in response:
+        delta = chunk.choices[0].delta.content or ''
+        print(delta, end='', flush=True)
+        result += delta
+    return result
+
+    # If not using stream
+    # return response.choices[0].message.content
