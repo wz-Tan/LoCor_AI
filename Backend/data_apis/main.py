@@ -3,10 +3,10 @@ from dotenv import load_dotenv
 
 load_dotenv()   # Needed by trends
 
-from apis import news_trends, youtube_trends, tiktok_trends
+from apis import news_trends, youtube_trends, tiktok_trends, twitter_trends
 from ai_synthesize import synthesize_trends
 
-ACTIVE_APIS = [news_trends, youtube_trends, tiktok_trends] 
+ACTIVE_APIS = [news_trends, youtube_trends, tiktok_trends, twitter_trends] 
 
 async def fetch_all():
     results = await asyncio.gather(
@@ -25,13 +25,10 @@ async def fetch_all():
 
 async def main():
     print('Fetching trends from all platforms...')
-    all_data = await fetch_all()
+    data = await fetch_all()
 
-    print(f'✅ Got data from {len(all_data)} platforms. Synthesizing...')
-    summary = synthesize_trends(all_data)
-
-    print('\n===== TREND REPORT =====\n')
-    print(summary)
+    print(f'✅ Got data from {len(data)} platforms. Synthesizing...')
+    summary = synthesize_trends(data)
 
 if __name__ == '__main__':
     asyncio.run(main())
