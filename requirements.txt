@@ -7,3 +7,4 @@ dotenv
 requests
 zai-sdk
 python-docx
+chromadb
