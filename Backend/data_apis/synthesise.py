@@ -1,6 +1,6 @@
 import asyncio
-from fetch_all_apis import fetch_all
-from ai_summarise import summarise_trends
+from .fetch_all_apis import fetch_all
+from .ai_summarise import summarise_trends
 
 async def fetch_and_summarise_trends() -> str:
     print('Fetching trends from all platforms...')

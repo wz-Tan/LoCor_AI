@@ -8,3 +8,4 @@ requests
 zai-sdk
 python-docx
 chromadb
+asyncio

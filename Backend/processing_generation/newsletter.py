@@ -2,7 +2,6 @@
 import os
 
 import dotenv
-import process
 import resend
 from pandas.io.common import BytesIO
 
