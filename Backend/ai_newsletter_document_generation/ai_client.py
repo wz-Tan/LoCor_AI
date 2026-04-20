@@ -16,7 +16,7 @@ client = ZaiClient(api_key=API_KEY)
 # Talk to the AI
 # Create chat completion
 response = client.chat.completions.create(
-    model="glm-4.5-flash",
+    model="glm-4.7-flash",
     messages=[
         {"role": "system", "content": "You are an AI writer."},
         {"role": "user", "content": "Tell a story about AI."},

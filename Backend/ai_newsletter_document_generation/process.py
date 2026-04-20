@@ -1,7 +1,6 @@
 # Module to handle files, and run pandas
 import io
 import json
-
 import docx
 import fitz
 import pandas as pd
