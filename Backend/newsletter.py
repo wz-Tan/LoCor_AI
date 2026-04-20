@@ -2,6 +2,7 @@
 import os
 
 import dotenv
+import process
 import resend
 
 # Initialise Environment
@@ -11,15 +12,10 @@ resend.api_key = os.getenv("RESEND_API_KEY")
 email_address = os.getenv("EMAIL")
 
 
-def decode_attachment(filepath):
-    f: bytes = open(os.path.join(os.path.dirname(__file__), filepath), "rb").read()
-    return f
-
-
 # Send Email to User
-def send_email(report, spreadsheet):
-    report = decode_attachment("./Sample_WordFile.docx")
-    spreadsheet = decode_attachment("./Sample_Spreadsheet.xlsx")
+def send_email(reportBuffer, spreadsheetBuffer):
+    report = reportBuffer.read()
+    spreadsheet = spreadsheetBuffer.read()
 
     # Convert Bytes into Attachment item
     report_attachment: resend.Attachment = {
@@ -44,4 +40,8 @@ def send_email(report, spreadsheet):
     print(email)
 
 
-send_email("a", "b")
+word_buffer = process.generate_doc("This is some text")
+excel_buffer = process.generate_excel(
+    """[{"name": "Alice", "age": 30}, {"name": "Bob", "age": 25}]"""
+)
+send_email(word_buffer, excel_buffer)

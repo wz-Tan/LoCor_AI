@@ -4,3 +4,6 @@ textract
 resend
 pathlib
 dotenv
+requests
+zai-sdk
+python-docx
