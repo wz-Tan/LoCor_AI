@@ -17,17 +17,14 @@ How to Add New API?
 300/month
 https://rapidapi.com/ytjar/api/yt-api
 
-2. tiktok_api.py
-## Server error last time i see
-300/month
-https://rapidapi.com/tikwm-tikwm-default/api/tiktok-scraper7
-
-3. news_api.py
+2. news_api.py
 100/day
 https://rapidapi.com/bonaipowered/api/news-api14
 
-4. tiktok_api_3.py
+3. tiktok_api.py
 500/month
 https://rapidapi.com/llbbmm/api/tiktok-download5
 
-5. Add more pls (if got)
+---
+
+# Add more pls (if got)

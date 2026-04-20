@@ -38,7 +38,7 @@ Be specific and actionable. Avoid generic advice. Reference actual topics, hasht
     response = client.chat.completions.create(
         model='glm-4.7-flash',
         messages=[{'role': 'user', 'content': prompt}],
-        thinking={'type': 'disabled'},  # faster, no need for deep thinking here
+        thinking={'type': 'disabled'},  # Faster
         max_tokens=2048,
         temperature=0.5,
     )
