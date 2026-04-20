@@ -5,7 +5,7 @@ async def fetch_trends() -> dict:
         host='yt-api.p.rapidapi.com',
         endpoint='/trending',
         params={
-            'geo': 'US',
+            'geo': 'MY',
             'type': 'now'
         }
     )

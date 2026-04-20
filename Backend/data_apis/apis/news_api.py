@@ -7,6 +7,7 @@ async def fetch_trends() -> dict:
         params={
             'topic': 'General',
             'language': 'en',
+            'country': 'MY',
             'limit': '20'
         }
     )
