@@ -5,7 +5,7 @@ async def fetch_trends() -> dict:
         host='tiktok-download5.p.rapidapi.com',
         endpoint='/feedList',
         params={
-            'region': 'US',
+            'region': 'MY',
             'count': '20'
         }
     )

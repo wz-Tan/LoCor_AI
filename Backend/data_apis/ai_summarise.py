@@ -6,7 +6,7 @@ from zai import ZaiClient  # type: ignore
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
 
 
-def synthesize_trends(all_platform_data: list[dict]) -> str:
+def summarise_trends(all_platform_data: list[dict]) -> str:
     # Build a compact summary string per platform
     platforms_text = ""
     for platform_data in all_platform_data:
@@ -38,10 +38,21 @@ Be specific and actionable. Avoid generic advice. Reference actual topics, hasht
 """
 
     response = client.chat.completions.create(
-        model="glm-4.7-flash",
-        messages=[{"role": "user", "content": prompt}],
-        thinking={"type": "disabled"},  # Faster
-        max_tokens=2048,
+        model='glm-4.5-flash',
+        messages=[{'role': 'user', 'content': prompt}],
+        thinking={'type': 'disabled'},
+        max_tokens=1000,
         temperature=0.5,
+        stream=True
     )
-    return response.choices[0].message.content
+
+    # Print stream by stream
+    result = ''
+    for chunk in response:
+        delta = chunk.choices[0].delta.content or ''
+        print(delta, end='', flush=True)
+        result += delta
+    return result
+
+    # If not using stream
+    # return response.choices[0].message.content

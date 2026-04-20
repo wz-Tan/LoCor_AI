@@ -25,6 +25,10 @@ https://rapidapi.com/bonaipowered/api/news-api14
 500/month
 https://rapidapi.com/llbbmm/api/tiktok-download5
 
+4. twitter_api.py
+1000/month
+https://rapidapi.com/alexanderxbx/api/twitter-api45
+
 ---
 
 # Add more pls (if got)
