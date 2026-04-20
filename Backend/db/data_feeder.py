@@ -1,7 +1,6 @@
 from typing import List, Dict, Optional, Any
 from datetime import datetime
 import chromadb
-from chromadb.utils import embedding_functions
 
 def populate_db(documents, ids, metadatas=None, collection_name="database",
                 batch_size=100, **extra_metadata):
@@ -17,7 +16,6 @@ def populate_db(documents, ids, metadatas=None, collection_name="database",
     total_docs = len(documents)
 
     client = chromadb.PersistentClient(path="./chroma_db")
-    embedding_fn = embedding_functions.SentenceTransformerEmbeddingFunction(model_name="all-MiniLM-L6-v2")
 
     if metadatas is None:
         if extra_metadata:
@@ -33,7 +31,6 @@ def populate_db(documents, ids, metadatas=None, collection_name="database",
 
     collection = client.get_or_create_collection(
         name=collection_name,
-        embedding_function=embedding_fn,
         metadata={"created_at": datetime.now().isoformat()}
     )
 
