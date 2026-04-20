@@ -4,7 +4,7 @@ import os
 
 client = ZaiClient(api_key=os.getenv('Z_AI_API_KEY'))
 
-def synthesize_trends(all_platform_data: list[dict]) -> str:
+def summarise_trends(all_platform_data: list[dict]) -> str:
     # Build a compact summary string per platform
     platforms_text = ''
     for platform_data in all_platform_data:
