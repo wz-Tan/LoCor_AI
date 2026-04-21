@@ -1,7 +1,11 @@
-from parser import DocumentParser
+import uuid
+from datetime import datetime
+
+from db import data_feeder
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from processing_tools.parser import DocumentParser
 
 app = FastAPI()
 
@@ -28,10 +32,6 @@ async def initialise_data(
     sales_sheet: UploadFile,
     balance_sheet: UploadFile,
 ):
-    print("Description file is ", description_file)
-    print("invenotry file is ", inventory_sheet)
-    print("sales file is ", sales_sheet)
-    print("balance file is ", balance_sheet)
 
     # Parse Files into Word and Dataframes
     (
@@ -43,13 +43,25 @@ async def initialise_data(
         description_file, sales_sheet, inventory_sheet, balance_sheet
     )
 
-    # Upload Data into ChromaDB
-    await upload_to_chromadb(company_description, "Company Description")
+    # Use Current Time as metadata
+    date = datetime.now().strftime("%d/%m/%Y")
 
-    # Additional Processing for DataFrames
-    # await DocumentParser.upload_df_to_chromadb(inventory_df)
-    # await DocumentParser.upload_df_to_chromadb(sales_df)
-    # await DocumentParser.upload_df_to_chromadb(balance_sheet_df)
+    # Random ID
+    id = str(uuid.uuid4())
+
+    # Upload Data into ChromaDB
+    # Company Description
+    data_feeder.populate_db(
+        documents=[company_description],
+        ids=[id],
+        metadatas=[{"date_added": date}],
+        collection_name="Company_Description",
+    )
+
+    # Dataframes
+    parsed_inventory = DocumentParser._parse_dataframe(inventory_df)
+    parsed_sales = DocumentParser._parse_dataframe(sales_df)
+    parsed_balance_sheet = DocumentParser._parse_dataframe(balance_sheet_df)
 
     print("Initialisation is complete")
     return {"status": "ok"}
