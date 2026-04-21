@@ -1,7 +1,7 @@
-from . import newsletter, process, tools
+from . import newsletter, generate, tools
 
 __all__ = [
-    "process",
+    "generate",
     "tools",
     "newsletter",
 ]
