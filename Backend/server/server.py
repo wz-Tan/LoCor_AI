@@ -1,4 +1,4 @@
-import parser
+from parser import DocumentParser
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -39,7 +39,7 @@ async def initialise_data(
         inventory_df,
         sales_df,
         balance_sheet_df,
-    ) = await parser.initialise_data(
+    ) = await DocumentParser.initialise_data(
         description_file, sales_sheet, inventory_sheet, balance_sheet
     )
 
@@ -47,9 +47,9 @@ async def initialise_data(
     await upload_to_chromadb(company_description, "Company Description")
 
     # Additional Processing for DataFrames
-    # await parser.upload_dataframe_to_chromadb(inventory_df)
-    # await parser.upload_dataframe_to_chromadb(sales_df)
-    # await parser.upload_dataframe_to_chromadb(balance_sheet_df)
+    # await DocumentParser.upload_df_to_chromadb(inventory_df)
+    # await DocumentParser.upload_df_to_chromadb(sales_df)
+    # await DocumentParser.upload_df_to_chromadb(balance_sheet_df)
 
     print("Initialisation is complete")
     return {"status": "ok"}
