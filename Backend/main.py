@@ -23,7 +23,7 @@ AI_ENDPOINT = "https://api.z.ai/api/paas/v4/"
 # Create Client Instance
 client = ZaiClient(api_key=API_KEY)
 
-# TODO: Instead of Using A Hardcoded List Pull from ChromaDB
+# TODO: Instead of Using A Hardcoded List Pull from SQLite
 messages = [
     {
         "role": "system",

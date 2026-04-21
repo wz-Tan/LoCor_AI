@@ -93,6 +93,7 @@ class DocumentParser:
         doc = Document(io.BytesIO(file_bytes))
         return "\n".join(para.text for para in doc.paragraphs)
 
+    # Converting a Dataframe into A List Of Strings
     @staticmethod
     def _parse_dataframe(df: pd.DataFrame):
-        print(df)
+        return df.to_string()

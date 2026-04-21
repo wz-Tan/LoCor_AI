@@ -46,22 +46,42 @@ async def initialise_data(
     # Use Current Time as metadata
     date = datetime.now().strftime("%d/%m/%Y")
 
-    # Random ID
-    id = str(uuid.uuid4())
-
     # Upload Data into ChromaDB
     # Company Description
     data_feeder.populate_db(
         documents=[company_description],
-        ids=[id],
+        ids=[str(uuid.uuid4())],
         metadatas=[{"date_added": date}],
         collection_name="Company_Description",
     )
 
     # Dataframes
     parsed_inventory = DocumentParser._parse_dataframe(inventory_df)
+
+    data_feeder.populate_db(
+        documents=[parsed_inventory],
+        ids=[str(uuid.uuid4())],
+        metadatas=[{"date_added": date}],
+        collection_name="Inventory_Sheets",
+    )
+
     parsed_sales = DocumentParser._parse_dataframe(sales_df)
+
+    data_feeder.populate_db(
+        documents=[parsed_sales],
+        ids=[str(uuid.uuid4())],
+        metadatas=[{"date_added": date}],
+        collection_name="Sales_Sheets",
+    )
+
     parsed_balance_sheet = DocumentParser._parse_dataframe(balance_sheet_df)
+
+    data_feeder.populate_db(
+        documents=[parsed_balance_sheet],
+        ids=[str(uuid.uuid4())],
+        metadatas=[{"date_added": date}],
+        collection_name="Balance_Sheets",
+    )
 
     print("Initialisation is complete")
     return {"status": "ok"}
