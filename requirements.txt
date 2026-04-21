@@ -11,3 +11,5 @@ asyncio
 fastapi[standard]
 toon-llm
 datetime
+uuid
+redis

@@ -17,13 +17,13 @@ FUNCTION_MAP = {
 
 # Get this API Key from This Link (+ Documentation)
 # https://docs.z.ai/guides/overview/quick-start
-API_KEY = os.environ["Z_AI_API_KEY"]
+API_KEY = os.getenv("Z_AI_API_KEY")
 AI_ENDPOINT = "https://api.z.ai/api/paas/v4/"
 
 # Create Client Instance
 client = ZaiClient(api_key=API_KEY)
 
-# TODO: Instead of Using A Hardcoded List Pull from ChromaDB
+# TODO: Instead of Using A Hardcoded List Pull from SQLite
 messages = [
     {
         "role": "system",
@@ -78,16 +78,16 @@ async def main():
 
             print("Calling function ", function_name)
 
-            if function_name == "generate_doc":
-                doc_buffer = generate.generate_doc(**function_args)
-            elif function_name == "generate_excel":
-                excel_buffer = generate.generate_excel(**function_args)
-            elif function_name == "send_email":
-                if doc_buffer and excel_buffer:
-                    result = newsletter.send_email(doc_buffer, excel_buffer)
-                    print(f"Email info: {result}")
-                else:
-                    print("Missing either doc buffer or excel buffer")
+            match function_name:
+                case "generate_doc":
+                    doc_buffer = generate.generate_doc(**function_args)
+                case "generate_excel":
+                    excel_buffer = generate.generate_excel(**function_args)
+                case "send_email":
+                    if doc_buffer and excel_buffer:
+                        newsletter.send_email(doc_buffer, excel_buffer)
+                    else:
+                        print("Missing either doc buffer or excel buffer")
 
             messages.append(
                 {
