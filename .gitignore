@@ -10,3 +10,4 @@ knowledge-base/cdb_test.py
 knowledge-base/test_data_feeder.py
 knowledge-base/test.py
 chroma_db
+chat.db
