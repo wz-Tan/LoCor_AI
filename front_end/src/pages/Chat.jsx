@@ -193,6 +193,9 @@ const styles = `
     height: 100vh;
     position: relative;
     transition: margin-left 0.3s ease;
+    overflow: hidden;
+    min-width: 0;
+    max-width: calc(100vw - 460px);
   }
 
   .chat-main.collapsed { margin-left: 240px; }
@@ -220,6 +223,7 @@ const styles = `
   .messages-wrap {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 2rem;
     display: flex;
     flex-direction: column;
@@ -230,7 +234,7 @@ const styles = `
   .messages-wrap::-webkit-scrollbar-track { background: transparent; }
   .messages-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
 
-  .message { display: flex; gap: 12px; animation: fadeUp 0.3s ease both; }
+  .message { display: flex; gap: 12px; animation: fadeUp 0.3s ease both; width: 100%; box-sizing: border-box; }
   .message.user { flex-direction: row-reverse; }
 
   .avatar {
@@ -248,11 +252,10 @@ const styles = `
   .avatar.ai { background: rgba(160,155,255,0.15); border: 1px solid rgba(160,155,255,0.2); color: rgba(160,155,255,0.9); }
   .avatar.user { background: rgba(20,200,160,0.12); border: 1px solid rgba(20,200,160,0.2); color: rgba(20,200,160,0.9); }
 
-  .bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; font-size: 0.85rem; line-height: 1.6; }
+  .bubble { width: fit-content; max-width: 100%; padding: 12px 16px; border-radius: 16px; font-size: 0.85rem; line-height: 1.6; word-break: break-all; overflow-wrap: anywhere; white-space: pre-wrap; }
 
   .bubble.ai { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: rgba(240,237,232,0.8); border-top-left-radius: 4px; }
-  .bubble.user { background: rgba(160,155,255,0.12); border: 1px solid rgba(160,155,255,0.2); color: rgba(240,237,232,0.9); border-top-right-radius: 4px; }
-
+  .bubble.user { background: rgba(160,155,255,0.12); border: 1px solid rgba(160,155,255,0.2); color: rgba(240,237,232,0.9); border-top-right-radius: 4px; width: 100%; word-wrap: break-word; overflow-wrap: break-word; word-break: break-word; }
   .bubble-time { font-size: 0.65rem; color: rgba(240,237,232,0.2); margin-top: 6px; }
   .message.user .bubble-time { text-align: right; }
 
@@ -566,8 +569,8 @@ export default function Chat() {
             {activeSession?.messages.map((msg, i) => (
               <div key={i} className={`message ${msg.role}`}>
                 <div className={`avatar ${msg.role}`}>{msg.role === "ai" ? "AI" : "You"}</div>
-                <div>
-                  <div className={`bubble ${msg.role}`}>{msg.text}</div>
+                <div style={{ minWidth: 0, maxWidth: "65%", flex: "0 1 65%" }}>
+                  <div className={`bubble ${msg.role}`} style={{ width: "100%", wordBreak: "break-word", overflowWrap: "break-word" }}>{msg.text}</div>
                   <div className="bubble-time">{msg.time}</div>
                 </div>
               </div>
