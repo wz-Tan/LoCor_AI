@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 const styles = `
@@ -54,7 +55,30 @@ const styles = `
     display: flex;
   }
 
-  /* ---- Sidebar ---- */
+  .toggle-btn {
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 20;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(240,237,232,0.6);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #f0ede8;
+  }
+
   .sidebar {
     width: 220px;
     min-height: 100vh;
@@ -69,6 +93,11 @@ const styles = `
     left: 0;
     bottom: 0;
     z-index: 10;
+    transition: transform 0.3s ease;
+  }
+
+  .sidebar.closed {
+    transform: translateX(-220px);
   }
 
   .sidebar-logo {
@@ -125,17 +154,20 @@ const styles = `
     letter-spacing: 0.05em;
   }
 
-  /* ---- Main Content ---- */
   .main {
-    margin-left: 220px;
     flex: 1;
     padding: 2.5rem;
     animation: fadeUp 0.6s ease both;
+    margin-left: 220px;
+    transition: margin-left 0.3s ease;
   }
 
-  .page-header {
-    margin-bottom: 2rem;
+  .main.collapsed {
+    margin-left: 0;
+    padding-left: 4rem;
   }
+
+  .page-header { margin-bottom: 2rem; }
 
   .page-title {
     font-family: 'DM Serif Display', serif;
@@ -150,7 +182,6 @@ const styles = `
     font-weight: 300;
   }
 
-  /* ---- Metric Cards ---- */
   .metrics-grid {
     display: grid;
     grid-template-columns: repeat(4, 1fr);
@@ -184,16 +215,11 @@ const styles = `
     margin-bottom: 0.4rem;
   }
 
-  .metric-change {
-    font-size: 0.72rem;
-    font-weight: 300;
-  }
-
+  .metric-change { font-size: 0.72rem; font-weight: 300; }
   .up { color: rgba(20,200,160,0.8); }
   .down { color: rgba(255,100,100,0.8); }
   .neutral { color: rgba(240,237,232,0.3); }
 
-  /* ---- Content Row ---- */
   .content-row {
     display: grid;
     grid-template-columns: 1fr 1fr;
@@ -216,7 +242,6 @@ const styles = `
     margin-bottom: 1.25rem;
   }
 
-  /* ---- Trend Alerts ---- */
   .alert-item {
     display: flex;
     align-items: flex-start;
@@ -251,7 +276,6 @@ const styles = `
     margin-top: 2px;
   }
 
-  /* ---- Inventory Snapshot ---- */
   .inv-row {
     display: grid;
     grid-template-columns: 2fr 1fr 1fr;
@@ -297,7 +321,6 @@ const styles = `
     border: 1px solid rgba(255,180,50,0.2);
   }
 
-  /* ---- Last Report ---- */
   .report-box {
     display: flex;
     align-items: center;
@@ -312,24 +335,10 @@ const styles = `
   }
 
   .report-box:hover { border-color: rgba(160,155,255,0.3); }
+  .report-name { font-size: 0.82rem; color: rgba(240,237,232,0.75); margin-bottom: 3px; }
+  .report-date { font-size: 0.7rem; color: rgba(240,237,232,0.25); }
+  .report-arrow { font-size: 0.8rem; color: rgba(240,237,232,0.2); }
 
-  .report-name {
-    font-size: 0.82rem;
-    color: rgba(240,237,232,0.75);
-    margin-bottom: 3px;
-  }
-
-  .report-date {
-    font-size: 0.7rem;
-    color: rgba(240,237,232,0.25);
-  }
-
-  .report-arrow {
-    font-size: 0.8rem;
-    color: rgba(240,237,232,0.2);
-  }
-
-  /* ---- Quick Actions ---- */
   .actions-grid {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
@@ -371,6 +380,7 @@ const styles = `
 
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
 
   return (
     <>
@@ -381,10 +391,12 @@ export default function Dashboard() {
 
       <div className="dash-wrap">
 
-        {/* Sidebar */}
-        <aside className="sidebar">
-          <div className="sidebar-logo">Lo<em>Co</em>AI</div>
+        <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          {sidebarOpen ? "<" : ">"}
+        </button>
 
+        <aside className={`sidebar ${sidebarOpen ? "" : "closed"}`}>
+          <div className="sidebar-logo">Lo<em>Co</em>AI</div>
           <nav className="sidebar-nav">
             <button className="nav-item active" onClick={() => navigate("/dashboard")}>
               <span className="nav-icon">⊞</span> Dashboard
@@ -399,22 +411,16 @@ export default function Dashboard() {
               <span className="nav-icon">⊕</span> Upload Data
             </button>
           </nav>
-
-          <div className="sidebar-footer">
-            LoCoAI · SME Edition
-          </div>
+          <div className="sidebar-footer">LoCoAI · SME Edition</div>
         </aside>
 
-        {/* Main */}
-        <main className="main">
+        <main className={`main ${sidebarOpen ? "" : "collapsed"}`}>
 
-          {/* Header */}
           <div className="page-header">
             <h1 className="page-title">Good morning 👋</h1>
             <p className="page-subtitle">Here's your business health check for today.</p>
           </div>
 
-          {/* Metrics */}
           <div className="metrics-grid">
             {[
               { label: "Monthly Revenue", value: "RM 45,000", change: "↑ 12% vs last month", dir: "up" },
@@ -430,10 +436,7 @@ export default function Dashboard() {
             ))}
           </div>
 
-          {/* Row 1: Trend Alerts + Inventory Snapshot */}
           <div className="content-row">
-
-            {/* Trend Alerts */}
             <div className="card">
               <div className="card-title">Recent Trend Alerts</div>
               {[
@@ -452,7 +455,6 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Inventory Snapshot */}
             <div className="card">
               <div className="card-title">Inventory Snapshot</div>
               <div className="inv-row inv-header">
@@ -461,27 +463,23 @@ export default function Dashboard() {
                 <span>Status</span>
               </div>
               {[
-                { name: "Electric Drill", stock: 45, status: "OK" },
-                { name: "Wall Paint 5L", stock: 12, status: "Low" },
-                { name: "Screwdriver Set", stock: 120, status: "OK" },
-                { name: "Cable Wire 10m", stock: 8, status: "Low" },
-                { name: "PVC Pipe 1in", stock: 200, status: "OK" },
-                { name: "Sand Paper", stock: 150, status: "Warn" },
+                { name: "Electric Drill", stock: 45, status: "ok" },
+                { name: "Wall Paint 5L", stock: 12, status: "low" },
+                { name: "Screwdriver Set", stock: 120, status: "ok" },
+                { name: "Cable Wire 10m", stock: 8, status: "low" },
+                { name: "PVC Pipe 1in", stock: 200, status: "ok" },
+                { name: "Sand Paper", stock: 150, status: "warn" },
               ].map((item, i) => (
                 <div className="inv-row" key={i}>
                   <span>{item.name}</span>
                   <span>{item.stock}</span>
-                  <span className={`badge ${item.status.toLowerCase()}`}>{item.status}</span>
+                  <span className={`badge ${item.status}`}>{item.status.toUpperCase()}</span>
                 </div>
               ))}
             </div>
-
           </div>
 
-          {/* Row 2: Last Report + Quick Actions */}
           <div className="content-row">
-
-            {/* Last Report */}
             <div className="card">
               <div className="card-title">Last Reports Generated</div>
               {[
@@ -499,7 +497,6 @@ export default function Dashboard() {
               ))}
             </div>
 
-            {/* Quick Actions */}
             <div className="card">
               <div className="card-title">Quick Actions</div>
               <div className="actions-grid">
@@ -518,7 +515,6 @@ export default function Dashboard() {
                 ))}
               </div>
             </div>
-
           </div>
 
         </main>
