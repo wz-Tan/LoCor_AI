@@ -1,17 +1,8 @@
 import asyncio
 
-from .apis import news_trends, tiktok_trends, twitter_trends, youtube_trends
-from dotenv import load_dotenv
-
-load_dotenv()  # Needed by trends
-
-
-ACTIVE_APIS = [news_trends, youtube_trends, tiktok_trends, twitter_trends]
-
-
-async def fetch_all() -> list:
+async def fetch_all(active_apis) -> list:
     results = await asyncio.gather(
-        *[f() for f in ACTIVE_APIS],
+        *[f() for f in active_apis],
         return_exceptions=True,  # Don't let 1 failure kill the rest
     )
 
