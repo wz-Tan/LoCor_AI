@@ -538,6 +538,7 @@ const AI_REPLIES = {
   "What's my highest risk item?": "Your highest risk item right now is Wall Paint 5L. With only 12 units remaining and demand projected to rise in Q3, you're at risk of stockout within 6 days. Immediate restocking is recommended.",
   "Summarise this month's trends": "This month, Power Tools and Paint categories are trending upward — driven by the renovation season. Finishing products like Sand Paper are slowing down. Overall revenue is up 12% compared to last month. 3 items need urgent attention: Electric Drills, Wall Paint, and Cable Wire.",
   "Which items should I discount?": "Based on your inventory and sales velocity, Sand Paper has the slowest movement. With 150 units in stock and declining demand, a 15-20% discount would help clear stock before it becomes dead inventory. Cable Wire is also worth considering for a smaller discount.",
+  "Tell me more about my recommendations": "Based on your current inventory and market trends, here are my top recommendations: 1) Restock Electric Drills to at least 80 units — demand is up 34% this month. 2) Urgently reorder Wall Paint 5L — only 12 units left, projected stockout in 6 days. 3) Discount Sand Paper by 15-20% to clear slow-moving stock. 4) Hold all other orders — stock levels are optimal. Would you like me to go deeper on any specific item?",
 };
 
 function getTime() {
@@ -574,6 +575,15 @@ export default function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeSession?.messages, isTyping]);
+
+useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const q = params.get("q");
+    if (q) {
+      handleSuggestion(q);
+      window.history.replaceState({}, "", "/chat");
+    }
+  }, []);
 
   function handleNewChat() {
     const newSession = {
@@ -629,13 +639,6 @@ export default function Chat() {
 
   function handleSuggestion(text) {
     const userMsg = { role: "user", text, time: getTime() };
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === activeSessionId
-          ? { ...s, messages: [...s.messages, userMsg], title: s.title === "New conversation" ? text.slice(0, 30) : s.title }
-          : s
-      )
-    );
     setIsTyping(true);
     setTimeout(() => {
       const reply = AI_REPLIES[text] || "Based on your data, here's what I found...";
@@ -644,7 +647,7 @@ export default function Chat() {
       setSessions((prev) =>
         prev.map((s) =>
           s.id === activeSessionId
-            ? { ...s, messages: [...s.messages, userMsg, aiMsg] }
+            ? { ...s, messages: [...s.messages, userMsg, aiMsg], title: s.title === "New conversation" ? text.slice(0, 30) : s.title }
             : s
         )
       );

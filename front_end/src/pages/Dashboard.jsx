@@ -509,7 +509,7 @@ export default function Dashboard() {
                   { icon: "⊕", label: "Upload New Data", path: "/?reupload=true" },
                   { icon: "↓", label: "Export Report", path: "/dashboard" },
                   { icon: "⊞", label: "Trend Analysis", path: "/dashboard" },
-                  { icon: "✦", label: "Recommendations", path: "/inventory" },
+                  { icon: "✦", label: "Recommendations", path: "/inventory?scrollTo=recommendations" },
                 ].map((a, i) => (
                   <button className="action-btn" key={i} onClick={() => navigate(a.path)}>
                     <span className="action-icon">{a.icon}</span>

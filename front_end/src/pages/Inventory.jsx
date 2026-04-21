@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
 const styles = `
@@ -427,6 +427,16 @@ const FILTERS = ["All", "Restock", "Hold", "Clear", "Discount"];
 
 export default function Inventory() {
   const navigate = useNavigate();
+  const recommendationRef = useRef(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("scrollTo") === "recommendations") {
+      setTimeout(() => {
+        recommendationRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 300);
+    }
+  }, []);
   const [inventory, setInventory] = useState(
     initialInventory.map((i) => ({ ...i, decision: null }))
   );
@@ -579,7 +589,74 @@ export default function Inventory() {
               </div>
             ))}
           </div>
+			{/* AI Recommendations */}
+          <div ref={recommendationRef} style={{
+            background: "rgba(160,155,255,0.06)",
+            border: "1px solid rgba(160,155,255,0.18)",
+            borderRadius: "18px",
+            padding: "1.5rem",
+            marginBottom: "1.5rem",
+          }}>
+            <div style={{
+              fontSize: "0.7rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: "rgba(160,155,255,0.5)",
+              marginBottom: "1.25rem",
+            }}>
+              AI Recommendations
+            </div>
 
+            {[
+              { icon: "🔺", text: "Restock Electric Drills immediately — demand up 34%, projected stockout in 8 days." },
+              { icon: "🔺", text: "Increase Wall Paint 5L order — renovation season approaching, current stock critically low." },
+              { icon: "🔻", text: "Discount Sand Paper by 15-20% — slow moving stock, clear before it becomes dead inventory." },
+              { icon: "◆", text: "Hold Screwdriver Set and PVC Pipe orders — stock levels are optimal for current demand." },
+            ].map((r, i, arr) => (
+              <div key={i} style={{
+                display: "flex",
+                gap: "12px",
+                padding: "12px 0",
+                borderBottom: i < arr.length - 1 ? "1px solid rgba(255,255,255,0.05)" : "none",
+                fontSize: "0.83rem",
+                color: "rgba(240,237,232,0.7)",
+                lineHeight: 1.6,
+                alignItems: "flex-start",
+              }}>
+                <span style={{ flexShrink: 0 }}>{r.icon}</span>
+                <span>{r.text}</span>
+              </div>
+            ))}
+
+            <button
+              onClick={() => navigate("/chat?q=Tell me more about my recommendations")}
+              style={{
+                marginTop: "1.25rem",
+                display: "flex",
+                alignItems: "center",
+                gap: "8px",
+                padding: "10px 20px",
+                borderRadius: "10px",
+                border: "1px solid rgba(160,155,255,0.3)",
+                background: "rgba(160,155,255,0.1)",
+                color: "rgba(160,155,255,0.9)",
+                fontFamily: "'DM Sans', sans-serif",
+                fontSize: "0.82rem",
+                cursor: "pointer",
+                transition: "all 0.2s ease",
+              }}
+              onMouseEnter={(e) => {
+                e.target.style.background = "rgba(160,155,255,0.18)";
+                e.target.style.transform = "translateY(-1px)";
+              }}
+              onMouseLeave={(e) => {
+                e.target.style.background = "rgba(160,155,255,0.1)";
+                e.target.style.transform = "translateY(0)";
+              }}
+            >
+              Explore More with AI Chat →
+            </button>
+          </div>
           {/* Summary */}
           <div className="summary-row">
             <div className="summary-card">
