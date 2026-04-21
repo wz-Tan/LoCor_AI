@@ -8,6 +8,6 @@ zai-sdk
 python-docx
 chromadb
 asyncio
-"fastapi[standard]"
+fastapi[standard]
 toon-llm
 datetime
