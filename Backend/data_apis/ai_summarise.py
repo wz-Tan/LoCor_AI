@@ -1,20 +1,37 @@
 import json
 import os
-
+from toon import encode
 from zai import ZaiClient  # type: ignore
 
-client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
+client = ZaiClient(api_key=os.getenv('Z_AI_API_KEY'))
 
+def convert_to_toon(all_platform_data: list[dict]) -> str:
+    toon_text = ''
+    json_text = ''
+
+    # Convert to toon
+    for platform_data in all_platform_data:
+        trends = [
+            {**t, 'keywords': ','.join(t.get('keywords', []))}
+            for t in platform_data.get('trends', [])[:15]
+        ]
+        header = f'\n\n### {platform_data['platform']}\n'
+        toon_text += header + encode(trends) + '\n'
+        json_text += header + json.dumps(trends) + '\n'
+
+    # Compare
+    j, t = len(json_text), len(toon_text)
+    print(f'\nJSON  : {j} chars (~{j // 4} tokens)')
+    print(f'TOON  : {t} chars (~{t // 4} tokens)')
+    print(f'Saved : {j - t} chars ({round((1 - t / j) * 100, 1)}%)\n')
+
+    return toon_text
 
 def summarise_trends(all_platform_data: list[dict]) -> str:
-    # Build a compact summary string per platform
-    platforms_text = ""
-    for platform_data in all_platform_data:
-        platforms_text += f"\n\n### {platform_data['platform']}\n"
-        for i, trend in enumerate(platform_data.get("trends", [])[:15], 1):
-            platforms_text += f"{i}. {json.dumps(trend)}\n"
+    # Convert data to toon
+    platforms_text = convert_to_toon(all_platform_data)
 
-    prompt = f"""
+    prompt = f'''
 You are a strategic business intelligence analyst. Below is real-time trending content scraped from multiple platforms.
 
 {platforms_text}
@@ -35,7 +52,7 @@ Provide:
 4. **Content Strategy Recommendations** — What should businesses be posting about this week to stay relevant?
 
 Be specific and actionable. Avoid generic advice. Reference actual topics, hashtags, and publishers from the data.
-"""
+'''
 
     response = client.chat.completions.create(
         model='glm-4.5-flash',

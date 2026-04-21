@@ -9,4 +9,8 @@ zai-sdk
 python-docx
 chromadb
 asyncio
+<<<<<<< HEAD
 "fastapi[standard]"
+=======
+toon-llm
+>>>>>>> origin
