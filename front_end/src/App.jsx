@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import "./App.css";
+import { uploadInitDocuments } from "../api/init";
 
 // ---- Upload Box Component ----
 function UploadBox({ label, hint, icon, fileKey, accept, onFileChange, file }) {
@@ -105,6 +106,12 @@ export default function App() {
     if (!allFilesFilled) return;
     setStep(4);
     console.log("Company:", companyName, "Files:", files);
+    uploadInitDocuments(
+      files.companyDescription,
+      files.inventoryRecords,
+      files.salesSheets,
+      files.balanceSheets,
+    );
   }
 
   // ---- Screen 1: Title ----

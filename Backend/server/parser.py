@@ -8,6 +8,7 @@ from docx import Document
 async def initialise_data(
     description_file, inventory_sheet, sales_sheet, balance_sheet
 ):
+    print("Initialising data")
     try:
         # Store filenames before reading
         desc_filename = description_file.filename
@@ -57,7 +58,8 @@ async def initialise_data(
         else:
             return
 
-        return company_description, inventory_df, sales_df, balance_sheet_df
+        print("Completed data extraction")
+        return company_description, inventory_data, sales_data, balance_sheet_data
 
     except Exception as e:
         print("Error initialising data ", e)
@@ -79,7 +81,9 @@ def extract_from_pdf(file_bytes):
 
 
 # Handling Dataframes into ChromaDB
-def upload_dataframe_to_chromadb(df: pd.DataFrame, collection, source_filename: str):
+async def upload_dataframe_to_chromadb(
+    df: pd.DataFrame, collection, source_filename: str
+):
     for i, row in df.iterrows():
         collection.add(
             documents=[str(row.to_dict())],

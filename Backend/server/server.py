@@ -9,7 +9,6 @@ app = FastAPI()
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -29,6 +28,10 @@ async def initialise_data(
     sales_sheet: UploadFile,
     balance_sheet: UploadFile,
 ):
+    print("Description file is ", description_file)
+    print("invenotry file is ", inventory_sheet)
+    print("sales file is ", sales_sheet)
+    print("balance file is ", balance_sheet)
 
     # Parse Files into Word and Dataframes
     (
@@ -44,12 +47,13 @@ async def initialise_data(
     await upload_to_chromadb(company_description, "Company Description")
 
     # Additional Processing for DataFrames
-    await parser.upload_dataframe_to_chromadb(inventory_df)
-    await parser.upload_dataframe_to_chromadb(sales_df)
-    await parser.upload_dataframe_to_chromadb(balance_sheet_df)
+    # await parser.upload_dataframe_to_chromadb(inventory_df)
+    # await parser.upload_dataframe_to_chromadb(sales_df)
+    # await parser.upload_dataframe_to_chromadb(balance_sheet_df)
 
+    print("Initialisation is complete")
     return {"status": "ok"}
 
 
-def upload_to_chromadb(content: str, metadata: str):
+async def upload_to_chromadb(content: str, metadata: str):
     print(f"Uploading file {content} with metadata {metadata}")

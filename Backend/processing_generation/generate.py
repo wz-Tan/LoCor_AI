@@ -3,7 +3,6 @@ import io
 import json
 
 import docx
-import fitz
 import pandas as pd
 
 
