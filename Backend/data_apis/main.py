@@ -16,7 +16,7 @@ else:
 # Modify if for debug
 ACTIVE_APIS = [news_trends, youtube_trends, tiktok_trends, twitter_trends]
 
-async def fetch_and_summarise_trends() -> str:
+async def main() -> str:
     print('Fetching trends from all platforms...')
     data = await fetch_all(ACTIVE_APIS)
 
@@ -24,4 +24,4 @@ async def fetch_and_summarise_trends() -> str:
     return summarise_trends(data)
 
 if __name__ == '__main__':
-    asyncio.run(fetch_and_summarise_trends())
+    asyncio.run(main())
