@@ -9,3 +9,4 @@ zai-sdk
 python-docx
 chromadb
 asyncio
+"fastapi[standard]"
