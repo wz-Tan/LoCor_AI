@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 //import "./App.css";"
 import "../App.css";
 //import { uploadInitDocuments } from "../api/init";
@@ -79,7 +79,8 @@ function ProgressBar() {
 
 // ---- Main App ----
 export default function App() {
-  const params = new URLSearchParams(window.location.search);
+  const location = useLocation();
+  const params = new URLSearchParams(location.search);
   const isReupload = params.get("reupload") === "true";
   const [step, setStep] = useState(isReupload ? 3 : 1);
   const [companyName, setCompanyName] = useState("");
@@ -279,9 +280,9 @@ export default function App() {
                   ? "Initialise LoCoAI →"
                   : "Upload all 4 documents to continue"}
               </button>
-              <button className="btn-back" onClick={() => setStep(2)}>
-                ← Back
-              </button>
+              <button className="btn-back" onClick={() => isReupload ? navigate("/dashboard") : setStep(2)}>
+ 				 ← Back
+			  </button>
             </div>
           </div>
         </div>
