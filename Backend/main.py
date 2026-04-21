@@ -4,15 +4,15 @@ import os
 
 import dotenv
 from data_apis import fetch_and_summarise_trends
-from processing_generation import newsletter, process, tools
+from processing_generation import newsletter, generate, tools
 from zai import ZaiClient
 
 dotenv.load_dotenv()
 
 FUNCTION_MAP = {
     "send_email": newsletter.send_email,
-    "generate_doc": process.generate_doc,
-    "generate_excel": process.generate_excel,
+    "generate_doc": generate.generate_doc,
+    "generate_excel": generate.generate_excel,
 }
 
 # Get this API Key from This Link (+ Documentation)
@@ -79,9 +79,9 @@ async def main():
             print("Calling function ", function_name)
 
             if function_name == "generate_doc":
-                doc_buffer = process.generate_doc(**function_args)
+                doc_buffer = generate.generate_doc(**function_args)
             elif function_name == "generate_excel":
-                excel_buffer = process.generate_excel(**function_args)
+                excel_buffer = generate.generate_excel(**function_args)
             elif function_name == "send_email":
                 if doc_buffer and excel_buffer:
                     result = newsletter.send_email(doc_buffer, excel_buffer)
