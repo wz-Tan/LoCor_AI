@@ -55,7 +55,30 @@ const styles = `
     display: flex;
   }
 
-  /* ---- Sidebar ---- */
+  .toggle-btn {
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 20;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(240,237,232,0.6);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-btn:hover {
+    background: rgba(255,255,255,0.1);
+    color: #f0ede8;
+  }
+
   .sidebar {
     width: 220px;
     min-height: 100vh;
@@ -70,7 +93,10 @@ const styles = `
     left: 0;
     bottom: 0;
     z-index: 10;
+    transition: transform 0.3s ease;
   }
+
+  .sidebar.closed { transform: translateX(-220px); }
 
   .sidebar-logo {
     font-family: 'DM Serif Display', serif;
@@ -83,11 +109,7 @@ const styles = `
     color: rgba(160,155,255,0.9);
   }
 
-  .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
 
   .nav-item {
     display: flex;
@@ -106,10 +128,7 @@ const styles = `
     font-family: 'DM Sans', sans-serif;
   }
 
-  .nav-item:hover {
-    background: rgba(255,255,255,0.05);
-    color: rgba(240,237,232,0.8);
-  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(240,237,232,0.8); }
 
   .nav-item.active {
     background: rgba(160,155,255,0.12);
@@ -126,12 +145,17 @@ const styles = `
     letter-spacing: 0.05em;
   }
 
-  /* ---- Main ---- */
   .main {
-    margin-left: 220px;
     flex: 1;
     padding: 2.5rem;
     animation: fadeUp 0.6s ease both;
+    margin-left: 220px;
+    transition: margin-left 0.3s ease;
+  }
+
+  .main.collapsed {
+    margin-left: 0;
+    padding-left: 4rem;
   }
 
   .page-header {
@@ -148,11 +172,7 @@ const styles = `
     margin-bottom: 0.25rem;
   }
 
-  .page-subtitle {
-    font-size: 0.85rem;
-    color: rgba(240,237,232,0.35);
-    font-weight: 300;
-  }
+  .page-subtitle { font-size: 0.85rem; color: rgba(240,237,232,0.35); font-weight: 300; }
 
   .export-btn {
     display: flex;
@@ -169,12 +189,8 @@ const styles = `
     transition: all 0.2s ease;
   }
 
-  .export-btn:hover {
-    background: rgba(255,255,255,0.09);
-    color: #f0ede8;
-  }
+  .export-btn:hover { background: rgba(255,255,255,0.09); color: #f0ede8; }
 
-  /* ---- Urgent Banner ---- */
   .urgent-banner {
     background: rgba(255,100,100,0.07);
     border: 1px solid rgba(255,100,100,0.2);
@@ -195,22 +211,9 @@ const styles = `
     animation: pulse 1.2s ease infinite;
   }
 
-  .urgent-text {
-    font-size: 0.82rem;
-    color: rgba(255,100,100,0.9);
-  }
+  .urgent-text { font-size: 0.82rem; color: rgba(255,100,100,0.9); }
 
-  @keyframes pulse {
-    0%, 100% { opacity: 1; transform: scale(1); }
-    50% { opacity: 0.5; transform: scale(0.7); }
-  }
-
-  /* ---- Filter Tabs ---- */
-  .filter-tabs {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 1.5rem;
-  }
+  .filter-tabs { display: flex; gap: 8px; margin-bottom: 1.5rem; }
 
   .tab {
     padding: 7px 16px;
@@ -224,10 +227,7 @@ const styles = `
     transition: all 0.2s ease;
   }
 
-  .tab:hover {
-    background: rgba(255,255,255,0.05);
-    color: rgba(240,237,232,0.7);
-  }
+  .tab:hover { background: rgba(255,255,255,0.05); color: rgba(240,237,232,0.7); }
 
   .tab.active {
     background: rgba(160,155,255,0.12);
@@ -235,7 +235,6 @@ const styles = `
     color: rgba(160,155,255,0.95);
   }
 
-  /* ---- Table ---- */
   .table-wrap {
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.07);
@@ -272,22 +271,9 @@ const styles = `
     border-left: 2px solid rgba(255,100,100,0.4);
   }
 
-  .product-name {
-    font-size: 0.85rem;
-    color: #f0ede8;
-    font-weight: 500;
-  }
-
-  .product-cat {
-    font-size: 0.7rem;
-    color: rgba(240,237,232,0.3);
-    margin-top: 2px;
-  }
-
-  .cell {
-    font-size: 0.82rem;
-    color: rgba(240,237,232,0.6);
-  }
+  .product-name { font-size: 0.85rem; color: #f0ede8; font-weight: 500; }
+  .product-cat { font-size: 0.7rem; color: rgba(240,237,232,0.3); margin-top: 2px; }
+  .cell { font-size: 0.82rem; color: rgba(240,237,232,0.6); }
 
   .badge {
     display: inline-block;
@@ -298,35 +284,12 @@ const styles = `
     letter-spacing: 0.05em;
   }
 
-  .badge.restock {
-    background: rgba(255,100,100,0.1);
-    color: rgba(255,100,100,0.9);
-    border: 1px solid rgba(255,100,100,0.2);
-  }
+  .badge.restock { background: rgba(255,100,100,0.1); color: rgba(255,100,100,0.9); border: 1px solid rgba(255,100,100,0.2); }
+  .badge.hold { background: rgba(160,155,255,0.1); color: rgba(160,155,255,0.9); border: 1px solid rgba(160,155,255,0.2); }
+  .badge.clear { background: rgba(255,180,50,0.1); color: rgba(255,180,50,0.9); border: 1px solid rgba(255,180,50,0.2); }
+  .badge.discount { background: rgba(20,200,160,0.1); color: rgba(20,200,160,0.9); border: 1px solid rgba(20,200,160,0.2); }
 
-  .badge.hold {
-    background: rgba(160,155,255,0.1);
-    color: rgba(160,155,255,0.9);
-    border: 1px solid rgba(160,155,255,0.2);
-  }
-
-  .badge.clear {
-    background: rgba(255,180,50,0.1);
-    color: rgba(255,180,50,0.9);
-    border: 1px solid rgba(255,180,50,0.2);
-  }
-
-  .badge.discount {
-    background: rgba(20,200,160,0.1);
-    color: rgba(20,200,160,0.9);
-    border: 1px solid rgba(20,200,160,0.2);
-  }
-
-  /* ---- Action Buttons ---- */
-  .action-btns {
-    display: flex;
-    gap: 6px;
-  }
+  .action-btns { display: flex; gap: 6px; }
 
   .accept-btn {
     padding: 5px 12px;
@@ -340,9 +303,7 @@ const styles = `
     transition: all 0.2s ease;
   }
 
-  .accept-btn:hover {
-    background: rgba(20,200,160,0.15);
-  }
+  .accept-btn:hover { background: rgba(20,200,160,0.15); }
 
   .reject-btn {
     padding: 5px 12px;
@@ -356,27 +317,12 @@ const styles = `
     transition: all 0.2s ease;
   }
 
-  .reject-btn:hover {
-    background: rgba(255,100,100,0.08);
-    border-color: rgba(255,100,100,0.2);
-    color: rgba(255,100,100,0.8);
-  }
+  .reject-btn:hover { background: rgba(255,100,100,0.08); border-color: rgba(255,100,100,0.2); color: rgba(255,100,100,0.8); }
 
-  .accepted-label {
-    font-size: 0.72rem;
-    color: rgba(20,200,160,0.7);
-  }
+  .accepted-label { font-size: 0.72rem; color: rgba(20,200,160,0.7); }
+  .rejected-label { font-size: 0.72rem; color: rgba(240,237,232,0.2); }
 
-  .rejected-label {
-    font-size: 0.72rem;
-    color: rgba(240,237,232,0.2);
-  }
-
-  /* ---- Summary Footer ---- */
-  .summary-row {
-    display: flex;
-    gap: 12px;
-  }
+  .summary-row { display: flex; gap: 12px; }
 
   .summary-card {
     flex: 1;
@@ -394,15 +340,16 @@ const styles = `
     margin-bottom: 0.4rem;
   }
 
-  .summary-value {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    color: #f0ede8;
-  }
+  .summary-value { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #f0ede8; }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(20px); }
     to   { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.5; transform: scale(0.7); }
   }
 `;
 
@@ -416,17 +363,14 @@ const initialInventory = [
   { id: 7, name: "Hammer", category: "Hand Tools", current: 75, recommended: 75, price: "RM 25", action: "hold", reason: "Stable demand, no action needed.", urgent: false },
 ];
 
-const ACTION_LABELS = {
-  restock: "Restock",
-  hold: "Hold",
-  clear: "Clear",
-  discount: "Discount",
-};
-
+const ACTION_LABELS = { restock: "Restock", hold: "Hold", clear: "Clear", discount: "Discount" };
 const FILTERS = ["All", "Restock", "Hold", "Clear", "Discount"];
 
 export default function Inventory() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [inventory, setInventory] = useState(initialInventory.map((i) => ({ ...i, decision: null })));
+  const [filter, setFilter] = useState("All");
   const recommendationRef = useRef(null);
 
   useEffect(() => {
@@ -437,21 +381,12 @@ export default function Inventory() {
       }, 300);
     }
   }, []);
-  const [inventory, setInventory] = useState(
-    initialInventory.map((i) => ({ ...i, decision: null }))
-  );
-  const [filter, setFilter] = useState("All");
 
   function handleDecision(id, decision) {
-    setInventory((prev) =>
-      prev.map((item) => item.id === id ? { ...item, decision } : item)
-    );
+    setInventory((prev) => prev.map((item) => item.id === id ? { ...item, decision } : item));
   }
 
-  const filtered = inventory.filter((item) =>
-    filter === "All" ? true : item.action === filter.toLowerCase()
-  );
-
+  const filtered = inventory.filter((item) => filter === "All" ? true : item.action === filter.toLowerCase());
   const urgentCount = inventory.filter((i) => i.urgent).length;
   const acceptedCount = inventory.filter((i) => i.decision === "accepted").length;
   const pendingCount = inventory.filter((i) => i.decision === null).length;
@@ -466,8 +401,11 @@ export default function Inventory() {
 
       <div className="inv-wrap">
 
-        {/* Sidebar */}
-        <aside className="sidebar">
+        <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          {sidebarOpen ? "<" : ">"}
+        </button>
+
+        <aside className={`sidebar ${sidebarOpen ? "" : "closed"}`}>
           <div className="sidebar-logo">Lo<em>Co</em>AI</div>
           <nav className="sidebar-nav">
             <button className="nav-item" onClick={() => navigate("/dashboard")}>
@@ -486,10 +424,8 @@ export default function Inventory() {
           <div className="sidebar-footer">LoCoAI · SME Edition</div>
         </aside>
 
-        {/* Main */}
-        <main className="main">
+        <main className={`main ${sidebarOpen ? "" : "collapsed"}`}>
 
-          {/* Header */}
           <div className="page-header">
             <div>
               <h1 className="page-title">Inventory Manager</h1>
@@ -498,7 +434,6 @@ export default function Inventory() {
             <button className="export-btn">↓ Export Plan</button>
           </div>
 
-          {/* Urgent Banner */}
           {urgentCount > 0 && (
             <div className="urgent-banner">
               <span className="urgent-dot" />
@@ -508,20 +443,14 @@ export default function Inventory() {
             </div>
           )}
 
-          {/* Filter Tabs */}
           <div className="filter-tabs">
             {FILTERS.map((f) => (
-              <button
-                key={f}
-                className={`tab ${filter === f ? "active" : ""}`}
-                onClick={() => setFilter(f)}
-              >
+              <button key={f} className={`tab ${filter === f ? "active" : ""}`} onClick={() => setFilter(f)}>
                 {f}
               </button>
             ))}
           </div>
 
-          {/* Table */}
           <div className="table-wrap">
             <div className="table-header">
               <span>Product</span>
@@ -534,50 +463,24 @@ export default function Inventory() {
 
             {filtered.map((item) => (
               <div className={`table-row ${item.urgent ? "urgent" : ""}`} key={item.id}>
-
-                {/* Product */}
                 <div>
                   <div className="product-name">{item.name}</div>
                   <div className="product-cat">{item.category}</div>
-                  <div style={{ fontSize: "0.7rem", color: "rgba(240,237,232,0.25)", marginTop: "3px" }}>
-                    {item.reason}
-                  </div>
+                  <div style={{ fontSize: "0.7rem", color: "rgba(240,237,232,0.25)", marginTop: "3px" }}>{item.reason}</div>
                 </div>
-
-                {/* Current Stock */}
                 <div className="cell">{item.current} units</div>
-
-                {/* Recommended */}
                 <div className="cell" style={{
-                  color: item.recommended > item.current
-                    ? "rgba(20,200,160,0.8)"
-                    : item.recommended < item.current
-                    ? "rgba(255,180,50,0.8)"
-                    : "rgba(240,237,232,0.6)"
+                  color: item.recommended > item.current ? "rgba(20,200,160,0.8)" : item.recommended < item.current ? "rgba(255,180,50,0.8)" : "rgba(240,237,232,0.6)"
                 }}>
                   {item.recommended} units
                 </div>
-
-                {/* Price */}
                 <div className="cell">{item.price}</div>
-
-                {/* Action Badge */}
-                <div>
-                  <span className={`badge ${item.action}`}>
-                    {ACTION_LABELS[item.action]}
-                  </span>
-                </div>
-
-                {/* Decision Buttons */}
+                <div><span className={`badge ${item.action}`}>{ACTION_LABELS[item.action]}</span></div>
                 <div className="action-btns">
                   {item.decision === null ? (
                     <>
-                      <button className="accept-btn" onClick={() => handleDecision(item.id, "accepted")}>
-                        ✓ Accept
-                      </button>
-                      <button className="reject-btn" onClick={() => handleDecision(item.id, "rejected")}>
-                        ✕
-                      </button>
+                      <button className="accept-btn" onClick={() => handleDecision(item.id, "accepted")}>✓ Accept</button>
+                      <button className="reject-btn" onClick={() => handleDecision(item.id, "rejected")}>✕</button>
                     </>
                   ) : item.decision === "accepted" ? (
                     <span className="accepted-label">✓ Accepted</span>
@@ -585,11 +488,11 @@ export default function Inventory() {
                     <span className="rejected-label">✕ Rejected</span>
                   )}
                 </div>
-
               </div>
             ))}
           </div>
-			{/* AI Recommendations */}
+
+          {/* AI Recommendations */}
           <div ref={recommendationRef} style={{
             background: "rgba(160,155,255,0.06)",
             border: "1px solid rgba(160,155,255,0.18)",
@@ -645,19 +548,11 @@ export default function Inventory() {
                 cursor: "pointer",
                 transition: "all 0.2s ease",
               }}
-              onMouseEnter={(e) => {
-                e.target.style.background = "rgba(160,155,255,0.18)";
-                e.target.style.transform = "translateY(-1px)";
-              }}
-              onMouseLeave={(e) => {
-                e.target.style.background = "rgba(160,155,255,0.1)";
-                e.target.style.transform = "translateY(0)";
-              }}
             >
               Explore More with AI Chat →
             </button>
           </div>
-          {/* Summary */}
+
           <div className="summary-row">
             <div className="summary-card">
               <div className="summary-label">Total Items</div>

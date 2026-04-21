@@ -55,7 +55,27 @@ const styles = `
     display: flex;
   }
 
-  /* ---- Left Sidebar (Nav) ---- */
+  .toggle-btn {
+    position: fixed;
+    top: 1.25rem;
+    left: 1.25rem;
+    z-index: 20;
+    background: rgba(255,255,255,0.06);
+    border: 1px solid rgba(255,255,255,0.1);
+    color: rgba(240,237,232,0.6);
+    border-radius: 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: all 0.2s ease;
+  }
+
+  .toggle-btn:hover { background: rgba(255,255,255,0.1); color: #f0ede8; }
+
   .sidebar {
     width: 220px;
     min-height: 100vh;
@@ -70,24 +90,14 @@ const styles = `
     left: 0;
     bottom: 0;
     z-index: 10;
+    transition: transform 0.3s ease;
   }
 
-  .sidebar-logo {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    color: #f0ede8;
-  }
+  .sidebar.closed { transform: translateX(-220px); }
 
-  .sidebar-logo em {
-    font-style: italic;
-    color: rgba(160,155,255,0.9);
-  }
-
-  .sidebar-nav {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
+  .sidebar-logo { font-family: 'DM Serif Display', serif; font-size: 1.5rem; color: #f0ede8; }
+  .sidebar-logo em { font-style: italic; color: rgba(160,155,255,0.9); }
+  .sidebar-nav { display: flex; flex-direction: column; gap: 4px; }
 
   .nav-item {
     display: flex;
@@ -106,10 +116,7 @@ const styles = `
     font-family: 'DM Sans', sans-serif;
   }
 
-  .nav-item:hover {
-    background: rgba(255,255,255,0.05);
-    color: rgba(240,237,232,0.8);
-  }
+  .nav-item:hover { background: rgba(255,255,255,0.05); color: rgba(240,237,232,0.8); }
 
   .nav-item.active {
     background: rgba(160,155,255,0.12);
@@ -118,15 +125,8 @@ const styles = `
   }
 
   .nav-icon { font-size: 1rem; }
+  .sidebar-footer { margin-top: auto; font-size: 0.7rem; color: rgba(240,237,232,0.2); letter-spacing: 0.05em; }
 
-  .sidebar-footer {
-    margin-top: auto;
-    font-size: 0.7rem;
-    color: rgba(240,237,232,0.2);
-    letter-spacing: 0.05em;
-  }
-
-  /* ---- History Sidebar (Right of Nav) ---- */
   .history-sidebar {
     width: 240px;
     min-height: 100vh;
@@ -142,15 +142,12 @@ const styles = `
     flex-direction: column;
     gap: 1rem;
     overflow-y: auto;
+    transition: transform 0.3s ease;
   }
 
-  .history-title {
-    font-size: 0.68rem;
-    letter-spacing: 0.15em;
-    text-transform: uppercase;
-    color: rgba(240,237,232,0.2);
-    padding: 0 4px;
-  }
+  .history-sidebar.closed { transform: translateX(-220px); }
+
+  .history-title { font-size: 0.68rem; letter-spacing: 0.15em; text-transform: uppercase; color: rgba(240,237,232,0.2); padding: 0 4px; }
 
   .new-chat-btn {
     display: flex;
@@ -169,20 +166,9 @@ const styles = `
     text-align: left;
   }
 
-  .new-chat-btn:hover {
-    background: rgba(160,155,255,0.08);
-    border-color: rgba(160,155,255,0.25);
-    color: rgba(160,155,255,0.9);
-  }
+  .new-chat-btn:hover { background: rgba(160,155,255,0.08); border-color: rgba(160,155,255,0.25); color: rgba(160,155,255,0.9); }
 
-  .history-section-label {
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: rgba(240,237,232,0.15);
-    padding: 0 4px;
-    margin-top: 0.5rem;
-  }
+  .history-section-label { font-size: 0.65rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(240,237,232,0.15); padding: 0 4px; margin-top: 0.5rem; }
 
   .history-item {
     padding: 10px 12px;
@@ -192,35 +178,13 @@ const styles = `
     border: 1px solid transparent;
   }
 
-  .history-item:hover {
-    background: rgba(255,255,255,0.04);
-    border-color: rgba(255,255,255,0.07);
-  }
+  .history-item:hover { background: rgba(255,255,255,0.04); border-color: rgba(255,255,255,0.07); }
+  .history-item.selected { background: rgba(160,155,255,0.08); border-color: rgba(160,155,255,0.2); }
 
-  .history-item.selected {
-    background: rgba(160,155,255,0.08);
-    border-color: rgba(160,155,255,0.2);
-  }
+  .history-item-title { font-size: 0.8rem; color: rgba(240,237,232,0.65); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+  .history-item.selected .history-item-title { color: rgba(160,155,255,0.9); }
+  .history-item-date { font-size: 0.68rem; color: rgba(240,237,232,0.2); }
 
-  .history-item-title {
-    font-size: 0.8rem;
-    color: rgba(240,237,232,0.65);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-bottom: 3px;
-  }
-
-  .history-item.selected .history-item-title {
-    color: rgba(160,155,255,0.9);
-  }
-
-  .history-item-date {
-    font-size: 0.68rem;
-    color: rgba(240,237,232,0.2);
-  }
-
-  /* ---- Chat Main ---- */
   .chat-main {
     margin-left: 460px;
     flex: 1;
@@ -228,9 +192,11 @@ const styles = `
     flex-direction: column;
     height: 100vh;
     position: relative;
+    transition: margin-left 0.3s ease;
   }
 
-  /* Chat Header */
+  .chat-main.collapsed { margin-left: 240px; }
+
   .chat-header {
     padding: 1.5rem 2rem;
     border-bottom: 1px solid rgba(255,255,255,0.06);
@@ -239,17 +205,8 @@ const styles = `
     justify-content: space-between;
   }
 
-  .chat-header-title {
-    font-size: 0.9rem;
-    color: rgba(240,237,232,0.7);
-    font-weight: 500;
-  }
-
-  .chat-header-sub {
-    font-size: 0.72rem;
-    color: rgba(240,237,232,0.25);
-    margin-top: 2px;
-  }
+  .chat-header-title { font-size: 0.9rem; color: rgba(240,237,232,0.7); font-weight: 500; }
+  .chat-header-sub { font-size: 0.72rem; color: rgba(240,237,232,0.25); margin-top: 2px; }
 
   .model-badge {
     font-size: 0.68rem;
@@ -260,7 +217,6 @@ const styles = `
     color: rgba(160,155,255,0.8);
   }
 
-  /* Messages */
   .messages-wrap {
     flex: 1;
     overflow-y: auto;
@@ -274,12 +230,7 @@ const styles = `
   .messages-wrap::-webkit-scrollbar-track { background: transparent; }
   .messages-wrap::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.08); border-radius: 999px; }
 
-  .message {
-    display: flex;
-    gap: 12px;
-    animation: fadeUp 0.3s ease both;
-  }
-
+  .message { display: flex; gap: 12px; animation: fadeUp 0.3s ease both; }
   .message.user { flex-direction: row-reverse; }
 
   .avatar {
@@ -294,55 +245,18 @@ const styles = `
     flex-shrink: 0;
   }
 
-  .avatar.ai {
-    background: rgba(160,155,255,0.15);
-    border: 1px solid rgba(160,155,255,0.2);
-    color: rgba(160,155,255,0.9);
-  }
+  .avatar.ai { background: rgba(160,155,255,0.15); border: 1px solid rgba(160,155,255,0.2); color: rgba(160,155,255,0.9); }
+  .avatar.user { background: rgba(20,200,160,0.12); border: 1px solid rgba(20,200,160,0.2); color: rgba(20,200,160,0.9); }
 
-  .avatar.user {
-    background: rgba(20,200,160,0.12);
-    border: 1px solid rgba(20,200,160,0.2);
-    color: rgba(20,200,160,0.9);
-  }
+  .bubble { max-width: 70%; padding: 12px 16px; border-radius: 16px; font-size: 0.85rem; line-height: 1.6; }
 
-  .bubble {
-    max-width: 70%;
-    padding: 12px 16px;
-    border-radius: 16px;
-    font-size: 0.85rem;
-    line-height: 1.6;
-  }
+  .bubble.ai { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.07); color: rgba(240,237,232,0.8); border-top-left-radius: 4px; }
+  .bubble.user { background: rgba(160,155,255,0.12); border: 1px solid rgba(160,155,255,0.2); color: rgba(240,237,232,0.9); border-top-right-radius: 4px; }
 
-  .bubble.ai {
-    background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,255,255,0.07);
-    color: rgba(240,237,232,0.8);
-    border-top-left-radius: 4px;
-  }
-
-  .bubble.user {
-    background: rgba(160,155,255,0.12);
-    border: 1px solid rgba(160,155,255,0.2);
-    color: rgba(240,237,232,0.9);
-    border-top-right-radius: 4px;
-  }
-
-  .bubble-time {
-    font-size: 0.65rem;
-    color: rgba(240,237,232,0.2);
-    margin-top: 6px;
-  }
-
+  .bubble-time { font-size: 0.65rem; color: rgba(240,237,232,0.2); margin-top: 6px; }
   .message.user .bubble-time { text-align: right; }
 
-  /* Typing indicator */
-  .typing {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    padding: 14px 16px;
-  }
+  .typing { display: flex; gap: 4px; align-items: center; padding: 14px 16px; }
 
   .typing-dot {
     width: 6px;
@@ -360,13 +274,7 @@ const styles = `
     50% { opacity: 1; transform: translateY(-3px); }
   }
 
-  /* Suggested Questions */
-  .suggestions {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px;
-    padding: 0 2rem 1rem;
-  }
+  .suggestions { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 2rem 1rem; }
 
   .suggestion-chip {
     padding: 7px 14px;
@@ -380,17 +288,9 @@ const styles = `
     transition: all 0.2s ease;
   }
 
-  .suggestion-chip:hover {
-    background: rgba(160,155,255,0.08);
-    border-color: rgba(160,155,255,0.25);
-    color: rgba(160,155,255,0.9);
-  }
+  .suggestion-chip:hover { background: rgba(160,155,255,0.08); border-color: rgba(160,155,255,0.25); color: rgba(160,155,255,0.9); }
 
-  /* Input Area */
-  .input-area {
-    padding: 1rem 2rem 1.5rem;
-    border-top: 1px solid rgba(255,255,255,0.06);
-  }
+  .input-area { padding: 1rem 2rem 1.5rem; border-top: 1px solid rgba(255,255,255,0.06); }
 
   .input-wrap {
     display: flex;
@@ -403,9 +303,7 @@ const styles = `
     transition: border-color 0.2s ease;
   }
 
-  .input-wrap:focus-within {
-    border-color: rgba(160,155,255,0.35);
-  }
+  .input-wrap:focus-within { border-color: rgba(160,155,255,0.35); }
 
   .chat-input {
     flex: 1;
@@ -422,23 +320,9 @@ const styles = `
 
   .chat-input::placeholder { color: rgba(240,237,232,0.2); }
 
-  .input-actions {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    flex-shrink: 0;
-  }
+  .input-actions { display: flex; align-items: center; gap: 8px; flex-shrink: 0; }
 
-  .attach-btn {
-    background: none;
-    border: none;
-    color: rgba(240,237,232,0.25);
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 4px;
-    transition: color 0.2s;
-  }
-
+  .attach-btn { background: none; border: none; color: rgba(240,237,232,0.25); cursor: pointer; font-size: 1rem; padding: 4px; transition: color 0.2s; }
   .attach-btn:hover { color: rgba(240,237,232,0.6); }
 
   .send-btn {
@@ -460,14 +344,8 @@ const styles = `
   .send-btn:hover { background: rgba(160,155,255,1); transform: scale(1.05); }
   .send-btn:disabled { background: rgba(255,255,255,0.08); color: rgba(240,237,232,0.2); cursor: not-allowed; transform: none; }
 
-  .input-hint {
-    font-size: 0.68rem;
-    color: rgba(240,237,232,0.15);
-    text-align: center;
-    margin-top: 8px;
-  }
+  .input-hint { font-size: 0.68rem; color: rgba(240,237,232,0.15); text-align: center; margin-top: 8px; }
 
-  /* File attachment preview */
   .file-preview {
     display: flex;
     align-items: center;
@@ -481,44 +359,7 @@ const styles = `
     color: rgba(20,200,160,0.9);
   }
 
-  .file-remove {
-    background: none;
-    border: none;
-    color: rgba(20,200,160,0.6);
-    cursor: pointer;
-    margin-left: auto;
-    font-size: 0.8rem;
-  }
-
-  /* Empty state */
-  .empty-state {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 1rem;
-    padding: 2rem;
-    text-align: center;
-  }
-
-  .empty-icon {
-    font-size: 2.5rem;
-    opacity: 0.4;
-  }
-
-  .empty-title {
-    font-family: 'DM Serif Display', serif;
-    font-size: 1.5rem;
-    color: rgba(240,237,232,0.6);
-  }
-
-  .empty-sub {
-    font-size: 0.82rem;
-    color: rgba(240,237,232,0.25);
-    max-width: 300px;
-    line-height: 1.6;
-  }
+  .file-remove { background: none; border: none; color: rgba(20,200,160,0.6); cursor: pointer; margin-left: auto; font-size: 0.8rem; }
 
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
@@ -551,6 +392,7 @@ function getDateLabel() {
 
 export default function Chat() {
   const navigate = useNavigate();
+  const [sidebarOpen, setSidebarOpen] = useState(true);
   const [sessions, setSessions] = useState([
     {
       id: 1,
@@ -568,7 +410,6 @@ export default function Chat() {
   const [attachedFile, setAttachedFile] = useState(null);
   const fileInputRef = useRef(null);
   const messagesEndRef = useRef(null);
-  const textareaRef = useRef(null);
 
   const activeSession = sessions.find((s) => s.id === activeSessionId);
 
@@ -576,12 +417,12 @@ export default function Chat() {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [activeSession?.messages, isTyping]);
 
-useEffect(() => {
+  useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const q = params.get("q");
     if (q) {
-      handleSuggestion(q);
       window.history.replaceState({}, "", "/chat");
+      handleSuggestion(q);
     }
   }, []);
 
@@ -598,45 +439,6 @@ useEffect(() => {
     setActiveSessionId(newSession.id);
   }
 
-  function updateSession(sessionId, userMsg, aiMsg) {
-    setSessions((prev) =>
-      prev.map((s) => {
-        if (s.id !== sessionId) return s;
-        const newMessages = [...s.messages, userMsg, aiMsg];
-        const title = userMsg.text.length > 30 ? userMsg.text.slice(0, 30) + "..." : userMsg.text;
-        return { ...s, messages: newMessages, title: s.title === "New conversation" ? title : s.title };
-      })
-    );
-  }
-
-  function handleSend() {
-    const text = input.trim();
-    if (!text && !attachedFile) return;
-
-    const userMsg = {
-      role: "user",
-      text: attachedFile ? `${text ? text + " " : ""}[Attached: ${attachedFile.name}]` : text,
-      time: getTime(),
-    };
-
-    setInput("");
-    	setAttachedFile(null);
-    	setIsTyping(true);
-
-    	setTimeout(() => {
-      		const reply = AI_REPLIES[text] || "That's a great question! Based on your uploaded data, I can see patterns that suggest you should focus on your high-demand items this season. Would you like me to break down specific recommendations for each product category?";
-      		const aiMsg = { role: "ai", text: reply, time: getTime() };
-      		setIsTyping(false);
-      		setSessions((prev) =>
-        		prev.map((s) =>
-         		 s.id === activeSessionId
-        		    ? { ...s, messages: [...s.messages, userMsg, aiMsg], title: s.title === "New conversation" ? (text.slice(0, 30) || attachedFile?.name) : s.title }
-        		    : s
-        )
-      );
-    }, 1500);
-  }
-
   function handleSuggestion(text) {
     const userMsg = { role: "user", text, time: getTime() };
     setIsTyping(true);
@@ -648,6 +450,31 @@ useEffect(() => {
         prev.map((s) =>
           s.id === activeSessionId
             ? { ...s, messages: [...s.messages, userMsg, aiMsg], title: s.title === "New conversation" ? text.slice(0, 30) : s.title }
+            : s
+        )
+      );
+    }, 1500);
+  }
+
+  function handleSend() {
+    const text = input.trim();
+    if (!text && !attachedFile) return;
+    const userMsg = {
+      role: "user",
+      text: attachedFile ? `${text ? text + " " : ""}[Attached: ${attachedFile.name}]` : text,
+      time: getTime(),
+    };
+    setInput("");
+    setAttachedFile(null);
+    setIsTyping(true);
+    setTimeout(() => {
+      const reply = AI_REPLIES[text] || "That's a great question! Based on your uploaded data, I can see patterns that suggest you should focus on your high-demand items this season. Would you like me to break down specific recommendations for each product category?";
+      const aiMsg = { role: "ai", text: reply, time: getTime() };
+      setIsTyping(false);
+      setSessions((prev) =>
+        prev.map((s) =>
+          s.id === activeSessionId
+            ? { ...s, messages: [...s.messages, userMsg, aiMsg], title: s.title === "New conversation" ? (text.slice(0, 30) || attachedFile?.name) : s.title }
             : s
         )
       );
@@ -673,8 +500,11 @@ useEffect(() => {
 
       <div className="chat-wrap">
 
-        {/* Nav Sidebar */}
-        <aside className="sidebar">
+        <button className="toggle-btn" onClick={() => setSidebarOpen(!sidebarOpen)}>
+          {sidebarOpen ? "<" : ">"}
+        </button>
+
+        <aside className={`sidebar ${sidebarOpen ? "" : "closed"}`}>
           <div className="sidebar-logo">Lo<em>Co</em>AI</div>
           <nav className="sidebar-nav">
             <button className="nav-item" onClick={() => navigate("/dashboard")}>
@@ -693,23 +523,15 @@ useEffect(() => {
           <div className="sidebar-footer">LoCoAI · SME Edition</div>
         </aside>
 
-        {/* History Sidebar */}
-        <aside className="history-sidebar">
+        <aside className={`history-sidebar ${sidebarOpen ? "" : "closed"}`}>
           <div className="history-title">Chat History</div>
-
-          <button className="new-chat-btn" onClick={handleNewChat}>
-            + New Chat
-          </button>
+          <button className="new-chat-btn" onClick={handleNewChat}>+ New Chat</button>
 
           {todaySessions.length > 0 && (
             <>
               <div className="history-section-label">Today</div>
               {todaySessions.map((s) => (
-                <div
-                  key={s.id}
-                  className={`history-item ${s.id === activeSessionId ? "selected" : ""}`}
-                  onClick={() => setActiveSessionId(s.id)}
-                >
+                <div key={s.id} className={`history-item ${s.id === activeSessionId ? "selected" : ""}`} onClick={() => setActiveSessionId(s.id)}>
                   <div className="history-item-title">{s.title}</div>
                   <div className="history-item-date">{getDateLabel()}</div>
                 </div>
@@ -721,11 +543,7 @@ useEffect(() => {
             <>
               <div className="history-section-label">Yesterday</div>
               {yesterdaySessions.map((s) => (
-                <div
-                  key={s.id}
-                  className={`history-item ${s.id === activeSessionId ? "selected" : ""}`}
-                  onClick={() => setActiveSessionId(s.id)}
-                >
+                <div key={s.id} className={`history-item ${s.id === activeSessionId ? "selected" : ""}`} onClick={() => setActiveSessionId(s.id)}>
                   <div className="history-item-title">{s.title}</div>
                   <div className="history-item-date">Yesterday</div>
                 </div>
@@ -734,10 +552,8 @@ useEffect(() => {
           )}
         </aside>
 
-        {/* Chat Main */}
-        <div className="chat-main">
+        <div className={`chat-main ${sidebarOpen ? "" : "collapsed"}`}>
 
-          {/* Header */}
           <div className="chat-header">
             <div>
               <div className="chat-header-title">{activeSession?.title || "New conversation"}</div>
@@ -746,13 +562,10 @@ useEffect(() => {
             <span className="model-badge">LoCoAI · GLM</span>
           </div>
 
-          {/* Messages */}
           <div className="messages-wrap">
             {activeSession?.messages.map((msg, i) => (
               <div key={i} className={`message ${msg.role}`}>
-                <div className={`avatar ${msg.role}`}>
-                  {msg.role === "ai" ? "AI" : "You"}
-                </div>
+                <div className={`avatar ${msg.role}`}>{msg.role === "ai" ? "AI" : "You"}</div>
                 <div>
                   <div className={`bubble ${msg.role}`}>{msg.text}</div>
                   <div className="bubble-time">{msg.time}</div>
@@ -763,7 +576,7 @@ useEffect(() => {
             {isTyping && (
               <div className="message ai">
                 <div className="avatar ai">AI</div>
-                <div className={`bubble ai typing`}>
+                <div className="bubble ai typing">
                   <span className="typing-dot" />
                   <span className="typing-dot" />
                   <span className="typing-dot" />
@@ -774,18 +587,14 @@ useEffect(() => {
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Suggested Questions */}
           {activeSession?.messages.length <= 1 && (
             <div className="suggestions">
               {SUGGESTED.map((s, i) => (
-                <button key={i} className="suggestion-chip" onClick={() => handleSuggestion(s)}>
-                  {s}
-                </button>
+                <button key={i} className="suggestion-chip" onClick={() => handleSuggestion(s)}>{s}</button>
               ))}
             </div>
           )}
 
-          {/* Input Area */}
           <div className="input-area">
             {attachedFile && (
               <div className="file-preview">
@@ -795,7 +604,6 @@ useEffect(() => {
             )}
             <div className="input-wrap">
               <textarea
-                ref={textareaRef}
                 className="chat-input"
                 placeholder="Ask anything about your business..."
                 value={input}
@@ -804,26 +612,12 @@ useEffect(() => {
                 rows={1}
               />
               <div className="input-actions">
-                <button className="attach-btn" onClick={() => fileInputRef.current?.click()} title="Attach file">
-                  📎
-                </button>
-                <input
-                  type="file"
-                  ref={fileInputRef}
-                  style={{ display: "none" }}
-                  accept="*"
-                  onChange={(e) => setAttachedFile(e.target.files[0])}
-                />
-                <button
-                  className="send-btn"
-                  onClick={handleSend}
-                  disabled={!input.trim() && !attachedFile}
-                >
-                  →
-                </button>
+                <button className="attach-btn" onClick={() => fileInputRef.current?.click()}>📎</button>
+                <input type="file" ref={fileInputRef} style={{ display: "none" }} accept="*" onChange={(e) => setAttachedFile(e.target.files[0])} />
+                <button className="send-btn" onClick={handleSend} disabled={!input.trim() && !attachedFile}>→</button>
               </div>
             </div>
-            <div className="input-hint">Press Enter to send · Shift+Enter for new line · Attach Excel or Word files</div>
+            <div className="input-hint">Press Enter to send · Shift+Enter for new line · Attach any file</div>
           </div>
 
         </div>
