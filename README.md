@@ -5,6 +5,9 @@ LoCor AI is an autonomous business intelligence platform designed to empower sma
 ## 🚀 Core Mission
 The project transforms raw business documents and social media noise into actionable strategic advice, helping owners optimize inventory, predict sales, and stay ahead of viral trends.
 
+## System Architecture
+![System Architecture](architecture.png)
+
 ---
 
 ## 🛠️ Key Features
