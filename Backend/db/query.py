@@ -53,7 +53,6 @@ def main():
         "Which one is related to modern TV?",
         "Which one is a quote by others?",
         "Which relates to the financial info of NVDIA?",
-        "Who is gay?",
     ]
 
     results = QueryFunction(queries)
