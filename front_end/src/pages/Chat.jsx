@@ -500,8 +500,8 @@ export default function Chat() {
             <button className="nav-item" onClick={() => navigate("/dashboard")}>
               <span className="nav-icon">⊞</span> Dashboard
             </button>
-            <button className="nav-item" onClick={() => navigate("/inventory")}>
-              <span className="nav-icon">◫</span> Inventory
+            <button className="nav-item" onClick={() => navigate("/insights")}>
+              <span className="nav-icon">◫</span> Insights
             </button>
             <button
               className="nav-item active"
