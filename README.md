@@ -82,6 +82,8 @@
 4. Run the server:
    ```bash
    python server.py
+   # or
+   uvicorn server:app --reload
    ```
 
 ### Frontend Setup
