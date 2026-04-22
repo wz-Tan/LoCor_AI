@@ -4,7 +4,7 @@ from datetime import datetime
 
 import chat
 from chat_history import sql
-from db import data_feeder
+from db import data_feeder, query
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
@@ -130,13 +130,42 @@ def get_chat_history():
 # User Sends Message -> AI Responds, and The Interaction Gets Saved
 @app.post("/chat_response")
 async def get_ai_response(body: UserMessage):
+    # For Querying Purposes
+    collection_names = [
+        "Company_Description",
+        "Inventory_Sheets",
+        "Balance_Sheets",
+        "Sales_Sheets",
+    ]
+    final_context = ""
 
-    chat_history = sql.get_all_messages(cursor)
-    chat_history.append({"role": "user", "content": body.user_response})
+    # Prompt to Refresh All Chat Data
+    if body.user_response == "refresh":
+        sql.clear_messages(cursor, conn)
+        sql.init_db(cursor, conn)
 
-    ai_response = await chat.get_ai_response(chat_history)
+    else:
+        chat_history = sql.get_all_messages(cursor)
+        chat_history.append({"role": "user", "content": body.user_response})
 
-    sql.save_message(cursor, conn, "user", body.user_response)
-    sql.save_message(cursor, conn, "assistant", ai_response)
+        # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
+        for collection_name in collection_names:
+            results = query.QueryFunction(
+                query=[body.user_response], collection_name=collection_name
+            )
 
-    return {"ai_response": ai_response}
+            docs = (
+                results["documents"][0]
+                if isinstance(results, dict) and results["documents"]
+                else []
+            )
+            context = "\n\n".join(docs) if docs else ""
+
+            final_context += context
+
+        ai_response = await chat.get_ai_response(chat_history, final_context)
+        sql.save_message(cursor, conn, "user", body.user_response)
+        sql.save_message(cursor, conn, "assistant", ai_response)
+
+        print("Ai response is ", ai_response)
+        return {"ai_response": ai_response}
