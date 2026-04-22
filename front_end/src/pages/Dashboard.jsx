@@ -401,8 +401,8 @@ export default function Dashboard() {
             <button className="nav-item active" onClick={() => navigate("/dashboard")}>
               <span className="nav-icon">⊞</span> Dashboard
             </button>
-            <button className="nav-item" onClick={() => navigate("/inventory")}>
-              <span className="nav-icon">◫</span> Inventory
+            <button className="nav-item" onClick={() => navigate("/insights")}>
+              <span className="nav-icon">◫</span> Insights
             </button>
             <button className="nav-item" onClick={() => navigate("/chat")}>
               <span className="nav-icon">◉</span> Chat
@@ -501,7 +501,7 @@ export default function Dashboard() {
               <div className="card-title">Quick Actions</div>
               <div className="actions-grid">
                 {[
-                  { icon: "◫", label: "View Inventory", path: "/inventory" },
+                  { icon: "◫", label: "View Insights", path: "/insights" },
                   { icon: "◉", label: "Ask AI", path: "/chat" },
                   { icon: "⊕", label: "Upload New Data", path: "/?reupload=true" },
                   { icon: "↓", label: "Export Report", path: "/dashboard" },

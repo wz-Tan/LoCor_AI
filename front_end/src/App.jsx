@@ -1,7 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Upload from "./pages/Upload";
 import Dashboard from "./pages/Dashboard";
-import Inventory from "./pages/Inventory";
+import Insights from "./pages/Insights";
 import Chat from "./pages/Chat";
 
 export default function App() {
@@ -10,7 +10,7 @@ export default function App() {
       <Routes>
         <Route path="/" element={<Upload />} />
         <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/Insights" element={<Insights />} />
         <Route path="/chat" element={<Chat />} />
       </Routes>
     </BrowserRouter>
