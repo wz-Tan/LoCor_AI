@@ -2,7 +2,7 @@ import sqlite3
 import uuid
 from datetime import datetime
 
-import chat
+import ai
 from chat_history import sql
 from db import data_feeder, query
 from fastapi import FastAPI
@@ -163,9 +163,44 @@ async def get_ai_response(body: UserMessage):
 
             final_context += context
 
-        ai_response = await chat.get_ai_response(chat_history, final_context)
+        ai_response = await ai.get_ai_response(chat_history, final_context)
         sql.save_message(cursor, conn, "user", body.user_response)
         sql.save_message(cursor, conn, "assistant", ai_response)
 
         print("Ai response is ", ai_response)
         return {"ai_response": ai_response}
+
+
+@app.get("/generate_insights")
+async def generate_insights():
+    # For Querying Purposes
+    collection_names = [
+        "Company_Description",
+        "Inventory_Sheets",
+        "Balance_Sheets",
+        "Sales_Sheets",
+    ]
+    final_context = ""
+
+    queryText = "sales trends inventory performance"
+    print("Generating insights")
+
+    # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
+    for collection_name in collection_names:
+        results = query.QueryFunction(
+            query=[queryText], collection_name=collection_name
+        )
+
+        docs = (
+            results["documents"][0]
+            if isinstance(results, dict) and results["documents"]
+            else []
+        )
+        context = "\n\n".join(docs) if docs else ""
+
+        final_context += context
+
+    generated_insights = await ai.generate_insights(final_context)
+
+    print("Generated insights are ", generated_insights)
+    return {"generated_insights": generated_insights}
