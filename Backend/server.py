@@ -4,6 +4,7 @@ from datetime import datetime
 
 import ai
 from chat_history import sql
+from data_apis import fetch_and_summarise_trends
 from db import data_feeder, query
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
@@ -184,7 +185,7 @@ async def generate_insights():
     final_context = ""
 
     queryText = "sales trends inventory performance"
-    print("Generating insights")
+    print("Generating newsletter")
 
     # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
     for collection_name in collection_names:

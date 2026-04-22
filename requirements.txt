@@ -14,4 +14,7 @@ datetime
 uuid
 redis
 pydantic
+htmldocx
+markdown
 uvicorn
+
