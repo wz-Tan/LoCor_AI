@@ -26,6 +26,14 @@ function getDateLabel() {
   return new Date().toLocaleDateString([], { weekday: "long", month: "short", day: "numeric" });
 }
 
+function formatMessage(text) {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/\*(.+?)\*/g, "<em>$1</em>")
+    .replace(/`(.+?)`/g, "<code style='background:rgba(255,255,255,0.1);padding:2px 6px;border-radius:4px;font-size:0.8em;'>$1</code>")
+    .replace(/\n/g, "<br/>");
+}
+
 export default function Chat() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -178,8 +186,7 @@ export default function Chat() {
               <div key={i} className={`message ${msg.role}`}>
                 <div className={`avatar ${msg.role}`}>{msg.role === "ai" ? "AI" : "You"}</div>
                 <div style={{ minWidth: 0, width: "70%", flex: "0 1 auto" }}>
-                  <div className={`bubble ${msg.role}`} style={{ width: "100%", wordBreak: "break-word", overflowWrap: "break-word" }}>{msg.text}</div>
-                  <div className="bubble-time">{msg.time}</div>
+                <div className={`bubble ${msg.role}`} style={{ width: "100%", wordBreak: "break-word", overflowWrap: "break-word" }} dangerouslySetInnerHTML={{ __html: formatMessage(msg.text) }} />                  <div className="bubble-time">{msg.time}</div>
                 </div>
               </div>
             ))}
