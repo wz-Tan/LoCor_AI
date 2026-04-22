@@ -13,3 +13,4 @@ toon-llm
 datetime
 uuid
 redis
+pydantic
