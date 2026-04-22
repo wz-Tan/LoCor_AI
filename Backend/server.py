@@ -1,13 +1,45 @@
+import sqlite3
 import uuid
 from datetime import datetime
 
+import chat
+from chat_history import sql
 from db import data_feeder
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from processing_tools.parser import DocumentParser
+from pydantic import BaseModel
+
+
+class UserMessage(BaseModel):
+    user_response: str
+
+
+# Connect to SQLite
+conn = sqlite3.connect("chat.db", check_same_thread=False)
+cursor = conn.cursor()
+
+# Create table
+cursor.execute("""
+    CREATE TABLE IF NOT EXISTS messages (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        role TEXT,
+        content TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+""")
+
+conn.commit()
 
 app = FastAPI()
+
+
+# Init DB
+@app.on_event("startup")
+def startup():
+    sql.init_db(cursor, conn)
+
 
 # Allow CORS
 app.add_middleware(
@@ -87,5 +119,24 @@ async def initialise_data(
     return {"status": "ok"}
 
 
-async def upload_to_chromadb(content: str, metadata: str):
-    print(f"Uploading file {content} with metadata {metadata}")
+# Acquire Chat History from SQLite
+@app.get("/chat_history")
+def get_chat_history():
+    chat_history = sql.get_all_messages(cursor)
+    print("chat history is ", chat_history)
+    return {"chat_history": chat_history}
+
+
+# User Sends Message -> AI Responds, and The Interaction Gets Saved
+@app.post("/chat_response")
+async def get_ai_response(body: UserMessage):
+
+    chat_history = sql.get_all_messages(cursor)
+    chat_history.append({"role": "user", "content": body.user_response})
+
+    ai_response = await chat.get_ai_response(chat_history)
+
+    sql.save_message(cursor, conn, "user", body.user_response)
+    sql.save_message(cursor, conn, "assistant", ai_response)
+
+    return {"ai_response": ai_response}
