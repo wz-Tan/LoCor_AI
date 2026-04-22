@@ -185,11 +185,15 @@ async def main():
     )
 
     report_content = response.choices[0].message.content
+    report_content = report_content.strip()
+    if report_content.startswith("```"):
+        report_content = report_content.split("\n", 1)[
+            1
+        ]  # remove first line (```markdown)
+    if report_content.endswith("```"):
+        report_content = report_content.rsplit("\n", 1)[0]  # remove last line (```)
+        
     print("Report content is ", report_content)
-
-    print("final_context length:", len(final_context))
-    print("report_content length:", len(report_content))
-    print("Combined:", len(final_context) + len(report_content))
 
     # Create Excel Content
     excel_messages = [

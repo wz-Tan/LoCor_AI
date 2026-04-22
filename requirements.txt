@@ -9,7 +9,7 @@ python-docx
 chromadb
 asyncio
 fastapi[standard]
-toon-llm
+toon
 datetime
 uuid
 redis
@@ -17,4 +17,3 @@ pydantic
 htmldocx
 markdown
 uvicorn
-
