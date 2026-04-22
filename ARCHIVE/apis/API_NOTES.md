@@ -13,9 +13,21 @@ How to Add New API?
 
 # All APIs
 
-1. lazada_api.py
-50/month
-https://rapidapi.com/tmapi-tmapi-default/api/lazada-api
+1. youtube_api.py
+300/month
+https://rapidapi.com/ytjar/api/yt-api
+
+2. news_api.py
+100/day
+https://rapidapi.com/bonaipowered/api/news-api14
+
+3. tiktok_api.py
+500/month
+https://rapidapi.com/llbbmm/api/tiktok-download5
+
+4. twitter_api.py
+1000/month
+https://rapidapi.com/alexanderxbx/api/twitter-api45
 
 ---
 
