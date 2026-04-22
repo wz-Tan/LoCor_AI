@@ -1,43 +1,45 @@
 # Module to Send a Generated Report for the User
 import os
 
-from dotenv import load_dotenv
 import resend
+from dotenv import load_dotenv
 from pandas.io.common import BytesIO
 
 # Initialise Environment
 load_dotenv()
 
-resend.api_key = os.getenv('RESEND_API_KEY')
-email_address = os.getenv('EMAIL')
+resend.api_key = os.getenv("RESEND_API_KEY")
+email_address = os.getenv("EMAIL")
 
 
 # Send Email to User
 def send_email(reportBuffer: BytesIO, spreadsheetBuffer: BytesIO) -> None:
-    '''Send Email to User with Attachments after Generating Word and Excel File'''
+    """Send Email to User with Attachments after Generating Word and Excel File"""
+    reportBuffer.seek(0)
+    spreadsheetBuffer.seek(0)
     report = reportBuffer.read()
     spreadsheet = spreadsheetBuffer.read()
 
     # Convert Bytes into Attachment items
     report_attachment: resend.Attachment = {
-        'content': list(report),
-        'filename': 'report.docx',
+        "content": list(report),
+        "filename": "report.docx",
     }
 
     spreadsheet_attachment: resend.Attachment = {
-        'content': list(spreadsheet),
-        'filename': 'spreadsheet.xlsx',
+        "content": list(spreadsheet),
+        "filename": "spreadsheet.xlsx",
     }
 
     # Email content
     params: resend.Emails.SendParams = {
-        'from': 'onboarding@resend.dev',
-        'to': [email_address],
-        'subject': 'Testing Email',
-        'html': '<strong>it works!</strong><br/>Hello',
-        'attachments': [report_attachment, spreadsheet_attachment],
+        "from": "onboarding@resend.dev",
+        "to": [email_address],
+        "subject": "Weekly Proposal and Business Report",
+        "html": "<strong>Attached are this week`s business report and the suggested inventory changes</strong>",
+        "attachments": [report_attachment, spreadsheet_attachment],
     }
 
     # Send email
     email = resend.Emails.send(params)
-    print(f'\nEmail sent:\n{email}\n')
+    print(f"\nEmail sent:\n{email}\n")

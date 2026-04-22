@@ -1,11 +1,18 @@
-import json
+import asyncio
 import os
 
-from dotenv import load_dotenv
+import dotenv
+from db import query
 from processing_generation import generate, newsletter
 from zai import ZaiClient
 
-load_dotenv()
+dotenv.load_dotenv()
+
+FUNCTION_MAP = {
+    "send_email": newsletter.send_email,
+    "generate_doc": generate.generate_doc,
+    "generate_excel": generate.generate_excel,
+}
 
 # Get this API Key from This Link (+ Documentation)
 # https://docs.z.ai/guides/overview/quick-start
@@ -15,110 +22,48 @@ AI_ENDPOINT = "https://api.z.ai/api/paas/v4/"
 # Create Client Instance
 client = ZaiClient(api_key=API_KEY)
 
-
-# Talk to the AI
-async def get_ai_response(chat_history, context):
-
-    messages = list(chat_history)  # copy to avoid mutating original
-
-    if context:
-        # find the existing system message and append context to it
-        if messages and messages[0]["role"] == "system":
-            messages[0] = {
-                "role": "system",
-                "content": messages[0]["content"]
-                + f"\n\nRelevant business data:\n\n{context}",
-            }
-        else:
-            messages.insert(
-                0,
-                {"role": "system", "content": f"Relevant business data:\n\n{context}"},
-            )
-
-    # Create chat completion
-    response = client.chat.completions.create(
-        model="glm-4.5-flash",
-        messages=messages,
-        max_tokens=2048,
-        temperature=0.5,
-    )
-
-    return response.choices[0].message.content
-
-
-async def generate_insights(context):
-    # Format JSON to be sent to front end
-    INSIGHTS_PROMPT = """
-    You are a professional market analyst consulting for an SME business owner.
-
-    Based on the business data provided, generate a JSON object with exactly this structure and nothing else. No explanation, no markdown, no extra text — only the raw JSON object.
-
+# TODO: Instead of Using A Hardcoded List Pull from SQLite
+messages = [
     {
-      "trends": [
-        {
-          "name": "category name",
-          "dir": "up | down | neutral",
-          "label": "↑ Trending | ↓ Slowing | → Stable",
-          "desc": "2-3 sentence observation about this category based on the data",
-          "competitor": "one line about competitor activity if relevant, or null"
-        }
-      ],
-      "insights": [
-        {
-          "icon": "a single relevant emoji",
-          "title": "short action-oriented title",
-          "body": "2-3 sentences explaining what to do and why, in plain language",
-          "dir": "buy | reduce | hold | watch",
-          "dirLabel": "→ Buy More | → Reduce / Discount | → Hold | → Watch Closely"
-        }
-      ],
-      "inventory": [
-        {
-          "name": "product name",
-          "cat": "category",
-          "stock": 0,
-          "capacity": 0,
-          "value": "RM X,XXX",
-          "status": "critical | excess | ok"
-        }
-      ]
-    }
+        "role": "system",
+        "content": "You are a professional market analyser with brilliant business decision making skills and persuasiveness on inventory management and sales prediction.",
+    },
+    {
+        "role": "user",
+        "content": "Imagine Christmas is Coming. Generate me a report and a corresponding spreadsheet on what I should buy more on, I am a Gift Store Owner. Once completed send me an email with the information",
+    },
+]
 
-    Rules:
-    - trends: one entry per product category, derived from sales and inventory data
-    - insights: 3 to 5 entries, focused on direction not numbers, written like a trusted advisor
-    - inventory: one entry per product, status is critical if stock is below 20% of capacity, excess if above 90%, ok otherwise
-    - Keep language concise and practical — this is for a busy SME owner, not a report
-    """
 
-    # TODO: Add Trend Fetches Here Too
-    messages = [
-        {"role": "system", "content": INSIGHTS_PROMPT},
-        {"role": "user", "content": f"Here is the business data:\n\n{context}"},
+async def main():
+    # For Querying Purposes
+    collection_names = [
+        "Company_Description",
+        "Inventory_Sheets",
+        "Balance_Sheets",
+        "Sales_Sheets",
     ]
+    final_context = ""
 
-    response = client.chat.completions.create(
-        model="glm-4.5-flash",
-        messages=messages,
-        thinking={"type": "disabled"},
-        max_tokens=2000,  # needs more room for full JSON
-        temperature=0.3,  # lower = more consistent JSON output
-    )
+    queryText = "sales trends inventory performance"
+    print("Generating newsletter")
 
-    raw = response.choices[0].message.content
-    clean = (
-        raw.strip()
-        .removeprefix("```json")
-        .removeprefix("```")
-        .removesuffix("```")
-        .strip()
-    )
+    # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
+    for collection_name in collection_names:
+        results = query.QueryFunction(
+            query=[queryText], collection_name=collection_name
+        )
 
-    return json.loads(clean)
+        docs = (
+            results["documents"][0]
+            if isinstance(results, dict) and results["documents"]
+            else []
+        )
+        context = "\n\n".join(docs) if docs else ""
 
+        final_context += context
 
-# Generate Newsletter (Context is Synthesized Data from ChromaDB + Trends)
-async def generate_newsletter(context):
+    # currentTrends = await fetch_and_summarise_trends()
 
     DOCUMENT_PROMPT = """
     You are a business analyst writing a weekly proposal document for a retail/e-commerce SME owner.
@@ -227,7 +172,7 @@ async def generate_newsletter(context):
         {"role": "system", "content": DOCUMENT_PROMPT},
         {
             "role": "user",
-            "content": f"Here is the business context. Take this as a crucial point of information:\n\n{context}",
+            "content": f"Here is the business context. Take this as a crucial point of information:\n\n{final_context}",
         },
     ]
 
@@ -236,17 +181,22 @@ async def generate_newsletter(context):
         model="glm-4.5-flash",
         messages=document_messages,
         thinking={"type": "disabled"},
-        max_tokens=2000,
+        max_tokens=8000,
     )
 
     report_content = response.choices[0].message.content
+    print("Report content is ", report_content)
+
+    print("final_context length:", len(final_context))
+    print("report_content length:", len(report_content))
+    print("Combined:", len(final_context) + len(report_content))
 
     # Create Excel Content
     excel_messages = [
         {"role": "system", "content": EXCEL_PROMPT},
         {
             "role": "user",
-            "content": f"Here is the business context. Take this as a crucial point of information and strictly follow it:\n\n{context}. Follow this business proposal {report_content}",
+            "content": f"Here is the business context. Take this as a crucial point of information and strictly follow it:\n\n{final_context}. Follow this business proposal {report_content}",
         },
     ]
 
@@ -254,10 +204,11 @@ async def generate_newsletter(context):
         model="glm-4.5-flash",
         messages=excel_messages,
         thinking={"type": "disabled"},
-        max_tokens=2000,
+        max_tokens=8000,
     )
 
     excel_content = response.choices[0].message.content
+    print("Excel content is ", excel_content)
 
     # Parse Them into Buffers
     word_buffer = generate.generate_doc(report_content)
@@ -265,3 +216,8 @@ async def generate_newsletter(context):
 
     # Send Email
     newsletter.send_email(word_buffer, excel_buffer)
+    print("Email is sent")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
