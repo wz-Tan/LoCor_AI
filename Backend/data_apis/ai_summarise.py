@@ -3,7 +3,6 @@ import os
 
 from toon import encode
 from zai import ZaiClient  # type: ignore
-from TEST_DATA import PROMPT
 
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
 
@@ -70,7 +69,9 @@ Answer these questions in order:
    - How many ADDITIONAL units must we sell to maintain current monthly profit levels?
    - What is the maximum price drop we could sustain before hitting break-even on current volume?
 
-5. **Execution Strategy**
+5. Supply Gap Analysis: Is any competitor OUT OF STOCK at a key price point? If yes, how can we capture their orphaned demand?
+   
+6. **Execution Strategy**
    - What should we change in our Lazada listing (title, image, description) to support this price?
    - What promotion or campaign would maximize this opportunity?
 
@@ -99,6 +100,8 @@ Be specific. Reference actual numbers from the data. Avoid generic advice.
 
 
 def test_summarise() -> str:
+    from TEST_DATA import PROMPT
+
     response = client.chat.completions.create(
         model="glm-4.5-flash",
         messages=[{"role": "user", "content": PROMPT}],

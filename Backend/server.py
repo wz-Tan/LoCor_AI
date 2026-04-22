@@ -11,6 +11,7 @@ from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from processing_tools.parser import DocumentParser
 from pydantic import BaseModel
+from contextlib import asynccontextmanager
 
 
 class UserMessage(BaseModel):
@@ -33,13 +34,13 @@ cursor.execute("""
 
 conn.commit()
 
-app = FastAPI()
 
-
-# Init DB
-@app.on_event("startup")
-def startup():
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     sql.init_db(cursor, conn)
+    yield
+
+app = FastAPI(lifespan=lifespan)
 
 
 # Allow CORS
@@ -205,3 +206,7 @@ async def generate_insights():
 
     print("Generated insights are ", generated_insights)
     return {"generated_insights": generated_insights}
+
+if __name__ == "__main__":
+    import uvicorn
+    uvicorn.run(app, host="0.0.0.0", port=8000)

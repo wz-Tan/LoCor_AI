@@ -16,3 +16,5 @@ redis
 pydantic
 htmldocx
 markdown
+uvicorn
+

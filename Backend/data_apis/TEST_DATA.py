@@ -101,7 +101,9 @@ Answer these questions in order:
    - How many ADDITIONAL units must we sell to maintain current monthly profit levels?
    - What is the maximum price drop we could sustain before hitting break-even on current volume?
 
-5. **Execution Strategy**
+5. Supply Gap Analysis: Is any competitor OUT OF STOCK at a key price point? If yes, how can we capture their orphaned demand?
+
+6. **Execution Strategy**
    - What should we change in our Lazada listing (title, image, description) to support this price?
    - What promotion or campaign would maximize this opportunity?
 

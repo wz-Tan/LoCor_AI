@@ -1,76 +1,105 @@
-# LoCor AI - Business Intelligence & Market Analysis Agent
+# LoCor AI 🚀
 
-LoCor AI is an autonomous business intelligence platform designed to empower small to medium-sized enterprises (SMEs) by bridging the gap between internal operational data and real-time external market trends.
+**LoCor AI** is an AI-powered business intelligence platform designed specifically for SMEs. It transforms raw business data—sales sheets, inventory logs, and company descriptions—into actionable insights, competitive pricing strategies, and automated reports.
 
-## 🚀 Core Mission
-The project transforms raw business documents and social media noise into actionable strategic advice, helping owners optimize inventory, predict sales, and stay ahead of viral trends.
+---
+
+## 🌟 Key Features
+
+### 1. Unified Data Ingestion
+- **Multi-Format Support**: Effortlessly upload and parse PDF/DOCX company descriptions and CSV/XLSX spreadsheets for Inventory, Sales, and Balance Sheets.
+- **Automated Processing**: Uses `pandas` for dataframes and `PyMuPDF` / `python-docx` for document text extraction.
+
+### 2. RAG-Powered Business Intelligence
+- **Semantic Search**: Powered by **ChromaDB**, the system performs Retrieval-Augmented Generation (RAG) to provide context-aware answers based on *your* specific business data.
+- **Intelligent Chat**: An interactive assistant that understands your business context. Ask about stock levels, sales trends, or future procurement needs.
+
+### 3. Automated Dashboard & Insights
+- **Trend Analysis**: Real-time identification of trending, stable, or slowing product categories.
+- **Actionable Advice**: Direct recommendations (Buy, Hold, Reduce, Watch) written like a professional consultant.
+- **Inventory Health**: Visual tracking of stock status (Critical, Excess, OK) based on capacity and current levels.
+
+### 4. Market & Competitive Intelligence
+- **Real-time API Integration**: Fetches live competitor data from platforms like Lazada.
+- **Pricing Strategist**: AI-driven analysis of the competitive landscape, providing exact RM pricing recommendations and profit margin analysis.
+- **Supply Gap Identification**: Pinpoints when competitors are out of stock to help you capture "orphaned demand."
+
+### 5. AI-Driven Automation
+- **Report Generation**: Automatically generates professional Word reports and Excel spreadsheets via AI tool calls.
+- **Seamless Distribution**: Integrated with **Resend** to email generated reports and spreadsheets directly to stakeholders.
+
+---
 
 ## System Architecture
 ![System Architecture](architecture.png)
 
 ---
 
-## 🛠️ Key Features
+## 🛠️ Tech Stack
 
-### 1. Market Trend Aggregation
-The system monitors global and regional trends across multiple platforms:
-- **Social Media:** TikTok, Twitter, and YouTube (via RapidAPI).
-- **News:** Real-time news aggregation focused on business and general topics.
-- **Efficiency:** Uses a custom **TOON encoding** to compress platform data, reducing LLM token usage by up to 30-50% while maintaining high data fidelity.
+### Frontend
+- **Framework**: React 19 (Vite)
+- **Routing**: React Router 7
+- **Styling**: TailwindCSS 4
+- **State Management**: React Hooks & Context
 
-### 2. Internal Business Intelligence (RAG)
-LoCor AI uses **Retrieval-Augmented Generation (RAG)** to understand the specific context of your business:
-- **Data Ingestion:** Automatically parses Company Descriptions, Sales Sheets, Inventory Lists, and Balance Sheets.
-- **Vector Storage:** Stores business context in **ChromaDB**, allowing the AI to make recommendations based on your actual stock levels and financial health.
+### Backend
+- **API Framework**: FastAPI (Python 3.10+)
+- **Vector Database**: ChromaDB (for RAG)
+- **SQL Database**: SQLite (for chat history)
+- **Caching**: Redis (for API product data)
+- **AI Models**: Z.ai (GLM-4.5-Flash)
 
-### 3. Agentic Execution
-Instead of just providing text, the AI acts as a digital consultant that can:
-- 📄 **Generate Reports:** Automatically create professional Word documents (`.docx`) summarizing market opportunities.
-- 📊 **Create Spreadsheets:** Produce Excel files (`.xlsx`) containing data-driven inventory suggestions.
-- 📧 **Automated Delivery:** Send the final deliverables directly to the owner's inbox using the **Resend API**.
-
-### 4. High-Performance Architecture
-- **Caching:** Utilizes **Redis** to cache trend summaries for 1 hour, minimizing API costs and latency.
-- **Async Processing:** Handles multiple API requests concurrently using Python's `asyncio`.
-- **FastAPI Backend:** Provides a robust REST API for frontend communication and data initialization.
+### Processing & Tools
+- **Data Science**: Pandas, NumPy
+- **Document Parsing**: PyMuPDF (fitz), python-docx
+- **Email Service**: Resend API
+- **Token Optimization**: Toon-LLM (for efficient data encoding)
 
 ---
 
-## 🔄 Data Flow
+## 🚀 Getting Started
 
-1.  **Ingestion:** The user uploads business spreadsheets via the `front_end`. The `Backend` parses these and populates the `ChromaDB` vector store.
-2.  **Observation:** The system fetches live data from TikTok, YouTube, Twitter, and News APIs.
-3.  **Summarization:** An AI agent analyzes the "noise" and produces a "Market Opportunity Report" (cached in Redis).
-4.  **Synthesis:** The main orchestrator (`main.py`) combines the **Business Context** (from ChromaDB) with the **Market Report** (from Redis).
-5.  **Action:** The AI invokes tools to generate files and sends a consolidated strategy email to the user.
+### Prerequisites
+- Python 3.10+
+- Node.js & npm
+- Redis Server (running on localhost:6379)
+- [Z.ai API Key](https://docs.z.ai/)
+- [Resend API Key](https://resend.com/)
 
----
+### Backend Setup
+1. Navigate to the `Backend` directory.
+2. Create a `.env` file based on `.env.example`:
+   ```env
+   Z_AI_API_KEY=your_zai_key
+   RESEND_API_KEY=your_resend_key
+   EMAIL=your_recipient_email
+   ```
+3. Install dependencies:
+   ```bash
+   pip install -r ../requirements.txt
+   ```
+4. Run the server:
+   ```bash
+   python server.py
+   # or
+   uvicorn server:app --reload
+   ```
 
-## 📂 Project Structure (Backend)
-
-| Directory | Responsibility |
-| :--- | :--- |
-| `data_apis/` | Logic for fetching and AI-summarizing platform trends (TikTok, News, etc.). |
-| `db/` | Vector database management and document population logic. |
-| `processing_generation/` | File generation (Word/Excel) and email notification services. |
-| `processing_tools/` | Document and DataFrame parsing utilities. |
-| `server.py` | The FastAPI entry point for data initialization and web requests. |
-| `main.py` | The core agentic loop and orchestrator. |
-
----
-
-## 🔧 Technology Stack
-- **AI/LLM:** Z.ai (GLM-4.5)
-- **Database:** ChromaDB (Vector), Redis (Cache)
-- **Frameworks:** FastAPI, Pandas, Asyncio
-- **APIs:** RapidAPI (Social/News), Resend (Email)
-- **File Handling:** Openpyxl (Excel), Python-docx (Word)
+### Frontend Setup
+1. Navigate to the `front_end` directory.
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Start the development server:
+   ```bash
+   npm run dev
+   ```
 
 ---
 
 # Redis Setup Guide
-
----
 
 ## Mac
 
@@ -192,15 +221,76 @@ redis_client = redis.Redis(host='localhost', port=6379, db=0)
 
 ---
 
+## 📂 Project Structure
+
+```bash
+LoCor_AI/
+├── .gitignore
+├── architecture.png
+├── README.md
+├── requirements.txt
+├── Backend/
+│   ├── .env.example    # Example environment config
+│   ├── ai.py     # AI logic for chat and automated business insights using Z.ai
+│   ├── main.py   # Test script for end-to-end AI automation loop
+│   ├── server.py    # FastAPI backend server
+│   ├── chat_history/
+│   │   └── sql.py   # Storage for chat messages
+│   ├── data_apis/
+│   │   ├── ai_summarise.py   # AI logic for summarizing APIs
+│   │   ├── fetch_all_apis.py    # Orchestrate fetching of APIs
+│   │   ├── main.py
+│   │   ├── TEST_DATA.py   # Sample data to test AI summarization
+│   │   └── apis/    # Individual API files
+│   ├── db/
+│   │   ├── data_feeder.py    # Store business data into ChromaDB
+│   │   └── query.py    # Vector search queries for RAG
+│   ├── processing_generation/
+│   │   ├── generate.py    # Generate Word and Excel documents
+│   │   ├── newsletter.py     # Sends email report to user
+│   │   └── tools.py    # Define AI tool calls
+│   └── processing_tools/
+│       └── parser.py   # Extracts data from PDF, DOCS, CSV and XLSX files
+└── front_end/
+    ├── eslint.config.js
+    ├── index.html
+    ├── LICENSE
+    ├── package.json
+    ├── vite.config.js
+    ├── api/
+    │   ├── chat.js     # AI chat API
+    │   ├── init.js     # System initialization and status
+    │   └── insights.js    # Fetch business insights
+    ├── public/
+    ├── sample/   # Sample documents as input
+    └── src/
+        ├── App.css
+        ├── App.jsx
+        ├── index.css
+        ├── main.jsx
+        ├── shared.css
+        ├── assets/
+        │   ├── hero.png
+        │   ├── react.svg
+        │   └── vite.svg
+        └── pages/
+            ├── Chat.jsx      # Interactive AI business assistant interface
+            ├── Dashboard.jsx    # Overview of business health and KPIs
+            ├── Insights.css
+            ├── Insights.jsx     # Detailed business strategy and market analysis view
+            └── Upload.jsx    # File input interface
+```
+
+---
+
 ## Optimization
 
 ### Uses TOON Instead of JSON
 
 Reduces token usage by ~25-30%, allowing for a faster model processing
 
-### Redis Caching (TODO Maybe)
+### Redis Caching
 
 Prevents duplicative API calls within a short timeframe. Enhances data retrieval speed
 
 ---
-
