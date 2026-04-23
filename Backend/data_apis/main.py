@@ -6,9 +6,9 @@ load_dotenv()  # Needed by imports
 
 # Relative imports if run as package
 if __package__:
-    from .fetch_all_apis import fetch_all
-    from .ai_summarise import summarise_products
-    from .apis import lazada_products
+    from data_apis.fetch_all_apis import fetch_all
+    from data_apis.ai_summarise import summarise_products
+    from data_apis.apis import lazada_products
 else:
     from fetch_all_apis import fetch_all
     from ai_summarise import summarise_products
