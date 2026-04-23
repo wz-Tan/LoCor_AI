@@ -1,7 +1,6 @@
 from redis import Redis
 
 class CacheManager:
-    # products_cache_key = 'cached_products'
     cache_expiry = 60 * 60    # 1 hour
     redis_client = Redis(host='localhost', port=6379, db=0)
     

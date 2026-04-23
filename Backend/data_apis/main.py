@@ -1,18 +1,18 @@
-import asyncio
-from dotenv import load_dotenv
-from cache_manager import CacheManager
+# Relative import
+if __name__ == '__main__':
+    import sys, os
+    sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
+
+from dotenv import load_dotenv
 load_dotenv()  # Needed by imports
 
-# Relative imports if run as package
-if __package__:
-    from data_apis.fetch_all_apis import fetch_all
-    from data_apis.ai_summarise import summarise_products
-    from data_apis.apis import lazada_products
-else:
-    from fetch_all_apis import fetch_all
-    from ai_summarise import summarise_products
-    from apis import lazada_products
+
+import asyncio
+from fetch_all_apis import fetch_all
+from ai_summarise import summarise_products
+from apis import lazada_products
+from cache_manager import CacheManager
 
 
 # APIs
@@ -23,8 +23,8 @@ CACHE_KEY = 'cached_products'
 async def main(testing: bool = False) -> str:
     # Test
     if testing:
-        from TEST_DATA import competitor_data
-        return summarise_products(competitor_data, testing=True)
+        from test_data import COMPETITOR_DATA
+        return summarise_products(COMPETITOR_DATA)
 
     # Cache if got
     cached = CacheManager.serve_cache(CACHE_KEY)
