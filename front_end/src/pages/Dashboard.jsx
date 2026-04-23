@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { getDashboard } from "../../api/dashboard";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
@@ -12,8 +13,7 @@ const styles = `
     background-image:
       linear-gradient(rgba(255,255,255,0.03) 1px, transparent 1px),
       linear-gradient(90deg, rgba(255,255,255,0.03) 1px, transparent 1px);
-    background-size: 60px 60px;
-    pointer-events: none; z-index: 0;
+    background-size: 60px 60px; pointer-events: none; z-index: 0;
   }
   .bg-glow {
     position: fixed; width: 600px; height: 600px; border-radius: 50%;
@@ -25,6 +25,7 @@ const styles = `
     background: radial-gradient(circle, rgba(20,200,160,0.08) 0%, transparent 70%);
     bottom: -50px; left: -50px; pointer-events: none; z-index: 0;
   }
+
   .dash-wrap { position: relative; z-index: 1; min-height: 100vh; display: flex; }
 
   .toggle-btn {
@@ -61,72 +62,74 @@ const styles = `
   .main { flex: 1; padding: 2.5rem; animation: fadeUp 0.6s ease both; margin-left: 220px; transition: margin-left 0.3s ease; }
   .main.collapsed { margin-left: 0; padding-left: 4rem; }
 
-  .page-header { margin-bottom: 2rem; }
+  .page-header { margin-bottom: 2rem; display: flex; align-items: flex-end; justify-content: space-between; }
   .page-title { font-family: 'DM Serif Display', serif; font-size: 2rem; color: #f0ede8; margin-bottom: 0.25rem; }
   .page-subtitle { font-size: 0.85rem; color: rgba(240,237,232,0.35); font-weight: 300; }
+  .last-updated { font-size: 0.7rem; color: rgba(240,237,232,0.2); }
 
-  .metrics-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 2rem; }
-  .metric-card {
-    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
-    border-radius: 16px; padding: 1.25rem; transition: border-color 0.2s ease;
+  .section-label {
+    font-size: 0.68rem; letter-spacing: 0.14em; text-transform: uppercase;
+    color: rgba(240,237,232,0.2); margin-bottom: 0.75rem; margin-top: 1.75rem;
   }
-  .metric-card:hover { border-color: rgba(255,255,255,0.15); }
-  .metric-label { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,237,232,0.3); margin-bottom: 0.6rem; }
-  .metric-value { font-family: 'DM Serif Display', serif; font-size: 1.75rem; color: #f0ede8; line-height: 1; margin-bottom: 0.4rem; }
-  .metric-change { font-size: 0.72rem; font-weight: 300; }
-  .up { color: rgba(20,200,160,0.8); }
-  .down { color: rgba(255,100,100,0.8); }
+
+  .stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+  .stat-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 1.4rem 1.25rem; transition: border-color 0.2s;
+  }
+  .stat-card:hover { border-color: rgba(255,255,255,0.15); }
+  .stat-label { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,237,232,0.28); margin-bottom: 0.65rem; }
+  .stat-value { font-family: 'DM Serif Display', serif; font-size: 1.9rem; color: #f0ede8; line-height: 1; margin-bottom: 0.45rem; }
+  .stat-change { font-size: 0.72rem; font-weight: 300; }
+  .stat-sub { font-size: 0.7rem; color: rgba(240,237,232,0.25); margin-top: 0.5rem; }
+  .up { color: rgba(20,200,160,0.85); }
+  .down { color: rgba(255,100,100,0.85); }
   .neutral { color: rgba(240,237,232,0.3); }
 
-  .content-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .breakdown-row { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
   .card { background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08); border-radius: 16px; padding: 1.5rem; }
-  .card-title { font-size: 0.7rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,237,232,0.3); margin-bottom: 1.25rem; }
+  .card-title { font-size: 0.68rem; letter-spacing: 0.12em; text-transform: uppercase; color: rgba(240,237,232,0.28); margin-bottom: 1.25rem; }
 
-  .alert-item { display: flex; align-items: flex-start; gap: 12px; padding: 12px 0; border-bottom: 1px solid rgba(255,255,255,0.05); }
-  .alert-item:last-child { border-bottom: none; }
-  .alert-dot { width: 8px; height: 8px; border-radius: 50%; margin-top: 5px; flex-shrink: 0; }
-  .alert-dot.high { background: rgba(255,100,100,0.8); }
-  .alert-dot.medium { background: rgba(160,155,255,0.8); }
-  .alert-dot.low { background: rgba(20,200,160,0.8); }
-  .alert-text { font-size: 0.82rem; color: rgba(240,237,232,0.7); line-height: 1.5; }
-  .alert-time { font-size: 0.7rem; color: rgba(240,237,232,0.25); margin-top: 2px; }
+  .sale-row { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .sale-row:last-child { border-bottom: none; }
+  .sale-name { font-size: 0.8rem; color: rgba(240,237,232,0.7); flex: 1; }
+  .sale-bar-wrap { flex: 2; height: 4px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; }
+  .sale-bar { height: 100%; border-radius: 99px; background: rgba(160,155,255,0.5); }
+  .sale-val { font-size: 0.75rem; color: rgba(240,237,232,0.45); min-width: 60px; text-align: right; }
+  .sale-change { font-size: 0.7rem; min-width: 48px; text-align: right; }
 
-  .inv-row { display: grid; grid-template-columns: 2fr 1fr 1fr; font-size: 0.8rem; padding: 10px 0; border-bottom: 1px solid rgba(255,255,255,0.05); color: rgba(240,237,232,0.65); align-items: center; }
-  .inv-row:last-child { border-bottom: none; }
-  .inv-header { color: rgba(240,237,232,0.2); font-size: 0.68rem; letter-spacing: 0.08em; text-transform: uppercase; }
+  .top-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid rgba(255,255,255,0.04); }
+  .top-item:last-child { border-bottom: none; }
+  .top-rank { font-size: 0.7rem; color: rgba(240,237,232,0.2); width: 18px; }
+  .top-name { font-size: 0.8rem; color: rgba(240,237,232,0.7); flex: 1; }
+  .top-units { font-size: 0.75rem; color: rgba(240,237,232,0.35); }
+  .top-rev { font-size: 0.78rem; color: rgba(240,237,232,0.6); font-family: 'DM Serif Display', serif; }
 
-  .badge { display: inline-block; font-size: 0.65rem; padding: 3px 8px; border-radius: 999px; font-weight: 500; }
-  .badge.ok { background: rgba(20,200,160,0.1); color: rgba(20,200,160,0.9); border: 1px solid rgba(20,200,160,0.2); }
-  .badge.low { background: rgba(255,100,100,0.1); color: rgba(255,100,100,0.85); border: 1px solid rgba(255,100,100,0.2); }
-  .badge.warn { background: rgba(255,180,50,0.1); color: rgba(255,180,50,0.85); border: 1px solid rgba(255,180,50,0.2); }
-
-  .report-box {
-    display: flex; align-items: center; justify-content: space-between;
-    padding: 14px 16px; background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.07);
-    border-radius: 12px; margin-bottom: 10px; transition: border-color 0.2s; cursor: pointer;
+  .trends-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  .trend-card {
+    background: rgba(255,255,255,0.04); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 16px; padding: 1.25rem; transition: border-color 0.2s;
   }
-  .report-box:hover { border-color: rgba(160,155,255,0.3); }
-  .report-name { font-size: 0.82rem; color: rgba(240,237,232,0.75); margin-bottom: 3px; }
-  .report-date { font-size: 0.7rem; color: rgba(240,237,232,0.25); }
-  .report-arrow { font-size: 0.8rem; color: rgba(240,237,232,0.2); }
-
-  .actions-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
-  .action-btn {
-    display: flex; flex-direction: column; align-items: center; justify-content: center;
-    gap: 8px; padding: 1.25rem 1rem; background: rgba(255,255,255,0.03);
-    border: 1px solid rgba(255,255,255,0.08); border-radius: 14px; cursor: pointer;
-    transition: all 0.2s ease; font-family: 'DM Sans', sans-serif;
-    color: rgba(240,237,232,0.6); font-size: 0.78rem; text-align: center;
+  .trend-card:hover { border-color: rgba(255,255,255,0.14); }
+  .trend-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 0.65rem; }
+  .trend-name { font-size: 0.83rem; font-weight: 500; color: rgba(240,237,232,0.85); }
+  .trend-pill { font-size: 0.65rem; padding: 2px 8px; border-radius: 999px; font-weight: 500; }
+  .trend-pill.up     { background: rgba(20,200,160,0.1);   color: rgba(20,200,160,0.9);   border: 1px solid rgba(20,200,160,0.2); }
+  .trend-pill.down   { background: rgba(255,100,100,0.1);  color: rgba(255,100,100,0.85); border: 1px solid rgba(255,100,100,0.2); }
+  .trend-pill.neutral{ background: rgba(240,237,232,0.05); color: rgba(240,237,232,0.4);  border: 1px solid rgba(240,237,232,0.1); }
+  .trend-desc { font-size: 0.77rem; color: rgba(240,237,232,0.45); line-height: 1.6; margin-bottom: 0.8rem; }
+  .competitor-box {
+    font-size: 0.72rem; color: rgba(160,155,255,0.75);
+    background: rgba(160,155,255,0.06); border: 1px solid rgba(160,155,255,0.12);
+    border-radius: 8px; padding: 7px 10px; line-height: 1.5;
   }
-  .action-btn:hover { background: rgba(160,155,255,0.08); border-color: rgba(160,155,255,0.25); color: rgba(160,155,255,0.9); transform: translateY(-2px); }
-  .action-icon { font-size: 1.25rem; }
+  .competitor-label { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(160,155,255,0.4); margin-bottom: 2px; }
 
   .empty-state { font-size: 0.8rem; color: rgba(240,237,232,0.2); text-align: center; padding: 2rem 0; }
 
   @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 `;
 
-// ─── NAV CONFIG ────────────────────────────────────────────────────────────────
 const NAV_ITEMS = [
   { icon: "⊞", label: "Dashboard", path: "/dashboard" },
   { icon: "◫", label: "Insights", path: "/insights" },
@@ -134,56 +137,92 @@ const NAV_ITEMS = [
   { icon: "⊕", label: "Upload Data", path: "/?reupload=true" },
 ];
 
-const QUICK_ACTIONS = [
-  { icon: "◫", label: "View Insights", path: "/insights" },
-  { icon: "◉", label: "Ask AI", path: "/chat" },
-  { icon: "⊕", label: "Upload New Data", path: "/?reupload=true" },
-  { icon: "↓", label: "Export Report", path: "/dashboard" },
-];
+// ─── SUB-COMPONENTS ──────────────────────────────────────────────────────────
 
-// ─── PROP SHAPE (what the backend should return) ────────────────────────────
-//
-// dashboardData: {
-//   greeting: string,                        // e.g. "Good morning 👋"
-//   subtitle: string,                        // e.g. "Here's your business health check for today."
-//
-//   metrics: Array<{
-//     label:  string,                        // "Monthly Revenue"
-//     value:  string,                        // "RM 45,000"
-//     change: string,                        // "↑ 12% vs last month"
-//     dir:    "up" | "down" | "neutral"
-//   }>,
-//
-//   alerts: Array<{
-//     level:  "high" | "medium" | "low",
-//     text:   string,
-//     time:   string                         // relative time string
-//   }>,
-//
-//   inventory: Array<{
-//     name:   string,
-//     stock:  number,
-//     status: "ok" | "low" | "warn"
-//   }>,
-//
-//   reports: Array<{
-//     name: string,
-//     date: string
-//   }>
-// }
+function StatCard({ label, value, change, dir, sub }) {
+  return (
+    <div className="stat-card">
+      <div className="stat-label">{label}</div>
+      <div className="stat-value">{value}</div>
+      <div className={`stat-change ${dir}`}>{change}</div>
+      {sub && <div className="stat-sub">{sub}</div>}
+    </div>
+  );
+}
 
-export default function Dashboard({ dashboardData = {} }) {
+function SaleRow({ name, value, change, dir, pct, maxPct }) {
+  return (
+    <div className="sale-row">
+      <span className="sale-name">{name}</span>
+      <div className="sale-bar-wrap">
+        <div
+          className="sale-bar"
+          style={{ width: `${(pct / maxPct) * 100}%` }}
+        />
+      </div>
+      <span className="sale-val">{value}</span>
+      <span className={`sale-change ${dir}`}>{change}</span>
+    </div>
+  );
+}
+
+function TopProductRow({ rank, name, units, revenue }) {
+  return (
+    <div className="top-item">
+      <span className="top-rank">#{rank}</span>
+      <span className="top-name">{name}</span>
+      <span className="top-units">{units} units</span>
+      <span className="top-rev">{revenue}</span>
+    </div>
+  );
+}
+
+function TrendCard({ name, dir, label, desc, competitor }) {
+  return (
+    <div className="trend-card">
+      <div className="trend-top">
+        <span className="trend-name">{name}</span>
+        <span className={`trend-pill ${dir}`}>{label}</span>
+      </div>
+      <p className="trend-desc">{desc}</p>
+      {competitor && (
+        <div className="competitor-box">
+          <div className="competitor-label">Competitor</div>
+          {competitor}
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─── MAIN COMPONENT ───────────────────────────────────────────────────────────
+
+export default function Dashboard() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    getDashboard().then((data) => {
+      setDashboardData(data);
+      setLoading(false);
+    });
+  }, []);
 
   const {
     greeting = "Good morning 👋",
     subtitle = "Here's your business health check for today.",
-    metrics = [],
-    alerts = [],
-    inventory = [],
-    reports = [],
-  } = dashboardData;
+    lastUpdated = "",
+    stats = [],
+    salesByCategory = [],
+    topProducts = [],
+    trends = [],
+  } = dashboardData ?? {};
+
+  const maxPct = salesByCategory.length
+    ? Math.max(...salesByCategory.map((s) => s.pct))
+    : 100;
 
   return (
     <>
@@ -204,7 +243,6 @@ export default function Dashboard({ dashboardData = {} }) {
           <div className="sidebar-logo">
             Lo<em>Co</em>AI
           </div>
-
           <nav className="sidebar-nav">
             {NAV_ITEMS.map((item) => (
               <button
@@ -216,110 +254,74 @@ export default function Dashboard({ dashboardData = {} }) {
               </button>
             ))}
           </nav>
-
           <div className="sidebar-footer">LoCoAI · SME Edition</div>
         </aside>
 
         <main className={`main ${sidebarOpen ? "" : "collapsed"}`}>
-          <div className="page-header">
-            <h1 className="page-title">{greeting}</h1>
-            <p className="page-subtitle">{subtitle}</p>
-          </div>
-
-          {/* ── METRICS ── */}
-          <div className="metrics-grid">
-            {metrics.length > 0 ? (
-              metrics.map((m, i) => (
-                <div className="metric-card" key={i}>
-                  <div className="metric-label">{m.label}</div>
-                  <div className="metric-value">{m.value}</div>
-                  <div className={`metric-change ${m.dir}`}>{m.change}</div>
+          {loading ? (
+            <p className="empty-state" style={{ marginTop: "4rem" }}>
+              Loading dashboard...
+            </p>
+          ) : (
+            <>
+              {/* ── HEADER ── */}
+              <div className="page-header">
+                <div>
+                  <h1 className="page-title">{greeting}</h1>
+                  <p className="page-subtitle">{subtitle}</p>
                 </div>
-              ))
-            ) : (
-              <p className="empty-state">No metrics available.</p>
-            )}
-          </div>
-
-          <div className="content-row">
-            {/* ── ALERTS ── */}
-            <div className="card">
-              <div className="card-title">Recent Trend Alerts</div>
-              {alerts.length > 0 ? (
-                alerts.map((a, i) => (
-                  <div className="alert-item" key={i}>
-                    <span className={`alert-dot ${a.level}`} />
-                    <div>
-                      <div className="alert-text">{a.text}</div>
-                      <div className="alert-time">{a.time}</div>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <p className="empty-state">No alerts right now.</p>
-              )}
-            </div>
-
-            {/* ── INVENTORY ── */}
-            <div className="card">
-              <div className="card-title">Inventory Snapshot</div>
-              <div className="inv-row inv-header">
-                <span>Product</span>
-                <span>Stock</span>
-                <span>Status</span>
+                {lastUpdated && (
+                  <span className="last-updated">{lastUpdated}</span>
+                )}
               </div>
-              {inventory.length > 0 ? (
-                inventory.map((item, i) => (
-                  <div className="inv-row" key={i}>
-                    <span>{item.name}</span>
-                    <span>{item.stock}</span>
-                    <span className={`badge ${item.status}`}>
-                      {item.status.toUpperCase()}
-                    </span>
-                  </div>
-                ))
-              ) : (
-                <p className="empty-state">No inventory data.</p>
-              )}
-            </div>
-          </div>
 
-          <div className="content-row">
-            {/* ── REPORTS ── */}
-            <div className="card">
-              <div className="card-title">Last Reports Generated</div>
-              {reports.length > 0 ? (
-                reports.map((r, i) => (
-                  <div className="report-box" key={i}>
-                    <div>
-                      <div className="report-name">{r.name}</div>
-                      <div className="report-date">{r.date}</div>
-                    </div>
-                    <span className="report-arrow">→</span>
-                  </div>
-                ))
-              ) : (
-                <p className="empty-state">No reports yet.</p>
-              )}
-            </div>
-
-            {/* ── QUICK ACTIONS ── */}
-            <div className="card">
-              <div className="card-title">Quick Actions</div>
-              <div className="actions-grid">
-                {QUICK_ACTIONS.map((a, i) => (
-                  <button
-                    className="action-btn"
-                    key={i}
-                    onClick={() => navigate(a.path)}
-                  >
-                    <span className="action-icon">{a.icon}</span>
-                    {a.label}
-                  </button>
-                ))}
+              {/* ── STATS ── */}
+              <div className="section-label" style={{ marginTop: 0 }}>
+                Performance
               </div>
-            </div>
-          </div>
+              <div className="stats-grid">
+                {stats.length > 0 ? (
+                  stats.map((s, i) => <StatCard key={i} {...s} />)
+                ) : (
+                  <p className="empty-state">Revenue data not yet connected.</p>
+                )}
+              </div>
+
+              {/* ── SALES BREAKDOWN + TOP PRODUCTS ── */}
+              {(salesByCategory.length > 0 || topProducts.length > 0) && (
+                <div className="breakdown-row">
+                  {salesByCategory.length > 0 && (
+                    <div className="card">
+                      <div className="card-title">Sales by Category</div>
+                      {salesByCategory.map((s, i) => (
+                        <SaleRow key={i} {...s} maxPct={maxPct} />
+                      ))}
+                    </div>
+                  )}
+                  {topProducts.length > 0 && (
+                    <div className="card">
+                      <div className="card-title">Top Products</div>
+                      {topProducts.map((p, i) => (
+                        <TopProductRow key={i} rank={i + 1} {...p} />
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {/* ── MARKET TRENDS + COMPETITOR INTEL ── */}
+              <div className="section-label">
+                Market Trends & Competitor Intel
+              </div>
+              <div className="trends-grid">
+                {trends.length > 0 ? (
+                  trends.map((t, i) => <TrendCard key={i} {...t} />)
+                ) : (
+                  <p className="empty-state">No trend data available.</p>
+                )}
+              </div>
+            </>
+          )}
         </main>
       </div>
     </>
