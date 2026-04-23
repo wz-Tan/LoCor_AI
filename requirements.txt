@@ -9,7 +9,7 @@ python-docx
 chromadb
 asyncio
 fastapi[standard]
-toon
+toon-llm
 datetime
 uuid
 redis

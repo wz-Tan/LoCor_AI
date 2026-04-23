@@ -81,9 +81,7 @@
    ```
 4. Run the server:
    ```bash
-   python server.py
-   # or
-   uvicorn server:app --reload
+   fastapi dev server.py
    ```
 
 ### Frontend Setup
