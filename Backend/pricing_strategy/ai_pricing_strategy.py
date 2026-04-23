@@ -2,7 +2,7 @@ import json
 import os
 from json_toon import json_to_toon
 from zai import ZaiClient  # type: ignore
-from prompts.ai_pricing_strategy import USER_DATA, prompt_with_data
+from prompts.ai_pricing_strategy import prompt_with_data
 
 
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
@@ -31,19 +31,20 @@ def convert_to_toon(all_platform_data: list[dict]) -> str:
     return toon_text
 
 
-def summarise_products(all_products: list[dict]) -> str:
+def compare_prices(user_data: dict, competitor_data: list[dict]) -> str:
     # Convert data to toon
     try:
-        all_products = convert_to_toon(all_products)
-    except AttributeError:
-        print('Failed to convert to TOON.\n')
+        competitor_data = convert_to_toon(competitor_data)
+    except AttributeError as e:
+        print(f'Failed to convert to TOON, using raw data. Reason: {e}')
+        competitor_data = json.dumps(competitor_data)
 
     # AI
     response = client.chat.completions.create(
         model="glm-4.5-flash",
         messages=[{
             "role": "user",
-            "content": prompt_with_data(USER_DATA, all_products)
+            "content": prompt_with_data(user_data, competitor_data)
         }],
         thinking={"type": "disabled"},
         max_tokens=2000,
