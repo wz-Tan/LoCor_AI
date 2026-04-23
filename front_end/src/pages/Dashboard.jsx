@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getDashboard } from "../../api/dashboard";
+import { getDashboard } from "./api";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
@@ -124,6 +124,15 @@ const styles = `
     border-radius: 8px; padding: 7px 10px; line-height: 1.5;
   }
   .competitor-label { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(160,155,255,0.4); margin-bottom: 2px; }
+  .price-box {
+    font-size: 0.72rem; margin-top: 8px;
+    background: rgba(255,255,255,0.03); border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 8px; padding: 7px 10px; line-height: 1.5;
+  }
+  .price-label { font-size: 0.62rem; letter-spacing: 0.1em; text-transform: uppercase; color: rgba(240,237,232,0.2); margin-bottom: 2px; }
+  .price-box.up   { border-color: rgba(20,200,160,0.2);  color: rgba(20,200,160,0.85); }
+  .price-box.down { border-color: rgba(255,100,100,0.2); color: rgba(255,100,100,0.8); }
+  .price-box.hold { border-color: rgba(255,180,50,0.2);  color: rgba(255,180,50,0.8); }
 
   .empty-state { font-size: 0.8rem; color: rgba(240,237,232,0.2); text-align: center; padding: 2rem 0; }
 
@@ -177,7 +186,17 @@ function TopProductRow({ rank, name, units, revenue }) {
   );
 }
 
-function TrendCard({ name, dir, label, desc, competitor }) {
+function TrendCard({
+  name,
+  dir,
+  label,
+  desc,
+  competitor,
+  priceAction,
+  priceSuggestion,
+}) {
+  const priceIcon =
+    priceAction === "up" ? "↑" : priceAction === "down" ? "↓" : "→";
   return (
     <div className="trend-card">
       <div className="trend-top">
@@ -189,6 +208,12 @@ function TrendCard({ name, dir, label, desc, competitor }) {
         <div className="competitor-box">
           <div className="competitor-label">Competitor</div>
           {competitor}
+        </div>
+      )}
+      {priceSuggestion && (
+        <div className={`price-box ${priceAction}`}>
+          <div className="price-label">Price Signal {priceIcon}</div>
+          {priceSuggestion}
         </div>
       )}
     </div>
