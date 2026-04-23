@@ -142,6 +142,7 @@ const styles = `
 const NAV_ITEMS = [
   { icon: "⊞", label: "Dashboard", path: "/dashboard" },
   { icon: "◫", label: "Insights", path: "/insights" },
+  { icon: "⊜", label: "Pricing", path: "/pricing" },
   { icon: "◉", label: "Chat", path: "/chat" },
   { icon: "⊕", label: "Upload Data", path: "/?reupload=true" },
 ];

@@ -503,6 +503,9 @@ export default function Chat() {
             <button className="nav-item" onClick={() => navigate("/insights")}>
               <span className="nav-icon">◫</span> Insights
             </button>
+            <button className="nav-item" onClick={() => navigate("/pricing")}>
+              <span className="nav-icon">⊜</span> Pricing
+            </button>
             <button
               className="nav-item active"
               onClick={() => navigate("/chat")}
