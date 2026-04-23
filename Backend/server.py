@@ -1,5 +1,6 @@
 import sqlite3
 import uuid
+from contextlib import asynccontextmanager
 from datetime import datetime
 
 import ai
@@ -11,7 +12,6 @@ from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from processing_tools.parser import DocumentParser
 from pydantic import BaseModel
-from contextlib import asynccontextmanager
 
 
 class UserMessage(BaseModel):
@@ -39,6 +39,7 @@ conn.commit()
 async def lifespan(app: FastAPI):
     sql.init_db(cursor, conn)
     yield
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -165,6 +166,8 @@ async def get_ai_response(body: UserMessage):
 
             final_context += context
 
+        # Findings += final context
+
         ai_response = await ai.get_ai_response(chat_history, final_context)
         sql.save_message(cursor, conn, "user", body.user_response)
         sql.save_message(cursor, conn, "assistant", ai_response)
@@ -207,6 +210,8 @@ async def generate_insights():
     print("Generated insights are ", generated_insights)
     return {"generated_insights": generated_insights}
 
+
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run(app, host="0.0.0.0", port=8000)
