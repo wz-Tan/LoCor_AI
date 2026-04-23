@@ -1,38 +1,32 @@
-import sqlite3
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
+import os
 
-import ai
+from zai import ZaiClient
+from ai_generation.ai_chat import AIChat
+from ai_generation.ai_report import AIReportGenerator
 from chat_history import sql
-from db import data_feeder, query
+from chat_history.database import conn, cursor
+from vector_db.retriever import VectorRetriever
+from vector_db.vector_store import VectorStore
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from pricing_strategy import get_pricing_strategy
 from processing_tools.parser import DocumentParser
 from pydantic import BaseModel
+
+
+client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
+ai_chat = AIChat(client)
+ai_report = AIReportGenerator(client)
 
 
 class UserMessage(BaseModel):
     user_response: str
 
 
-# Connect to SQLite
-conn = sqlite3.connect("chat.db", check_same_thread=False)
-cursor = conn.cursor()
-
-# Create table
-cursor.execute("""
-    CREATE TABLE IF NOT EXISTS messages (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        role TEXT,
-        content TEXT,
-        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-    )
-""")
-
-conn.commit()
+COLLECTION_NAMES = ["Company_Description", "Inventory_Sheets", "Balance_Sheets", "Sales_Sheets"]
 
 
 @asynccontextmanager
@@ -43,14 +37,22 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
-
-# Allow CORS
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+
+def _build_context(query_text: str) -> str:
+    context_parts = []
+    for name in COLLECTION_NAMES:
+        results = VectorRetriever(name).query([query_text])
+        docs = results["documents"][0] if isinstance(results, dict) and results["documents"] else []
+        if docs:
+            context_parts.append("\n\n".join(docs))
+    return "".join(context_parts)
 
 
 @app.get("/")
@@ -69,56 +71,30 @@ async def initialise_data(
 ):
 
     # Parse Files into Word and Dataframes
-    (
-        company_description,
-        inventory_df,
-        sales_df,
-        balance_sheet_df,
-    ) = await DocumentParser.initialise_data(
-        description_file, sales_sheet, inventory_sheet, balance_sheet
+    company_description, inventory_df, sales_df, balance_sheet_df, = (
+        await DocumentParser.initialise_data(
+            description_file, sales_sheet, inventory_sheet, balance_sheet
+        )
     )
 
     # Use Current Time as metadata
     date = datetime.now().strftime("%d/%m/%Y")
 
-    # Upload Data into ChromaDB
-    # Company Description
-    data_feeder.populate_db(
-        documents=[company_description],
-        ids=[str(uuid.uuid4())],
-        metadatas=[{"date_added": date}],
-        collection_name="Company_Description",
-    )
+    # Store data into ChromaDB
+    entries = [
+        ("Company_Description", company_description),
+        ("Inventory_Sheets",    DocumentParser._parse_dataframe(inventory_df)),
+        ("Sales_Sheets",        DocumentParser._parse_dataframe(sales_df)),
+        ("Balance_Sheets",      DocumentParser._parse_dataframe(balance_sheet_df)),
+    ]
+    for collection_name, document in entries:
+        VectorStore(collection_name).add(
+            documents=[document],
+            ids=[str(uuid.uuid4())],
+            metadatas=[{"date_added": date}],
+        )
 
-    # Dataframes
-    parsed_inventory = DocumentParser._parse_dataframe(inventory_df)
-
-    data_feeder.populate_db(
-        documents=[parsed_inventory],
-        ids=[str(uuid.uuid4())],
-        metadatas=[{"date_added": date}],
-        collection_name="Inventory_Sheets",
-    )
-
-    parsed_sales = DocumentParser._parse_dataframe(sales_df)
-
-    data_feeder.populate_db(
-        documents=[parsed_sales],
-        ids=[str(uuid.uuid4())],
-        metadatas=[{"date_added": date}],
-        collection_name="Sales_Sheets",
-    )
-
-    parsed_balance_sheet = DocumentParser._parse_dataframe(balance_sheet_df)
-
-    data_feeder.populate_db(
-        documents=[parsed_balance_sheet],
-        ids=[str(uuid.uuid4())],
-        metadatas=[{"date_added": date}],
-        collection_name="Balance_Sheets",
-    )
-
-    print("Initialisation is complete")
+    print("Initialisation completed")
     return {"status": "ok"}
 
 
@@ -133,147 +109,38 @@ def get_chat_history():
 # User Sends Message -> AI Responds, and The Interaction Gets Saved
 @app.post("/chat_response")
 async def get_ai_response(body: UserMessage):
-    # For Querying Purposes
-    collection_names = [
-        "Company_Description",
-        "Inventory_Sheets",
-        "Balance_Sheets",
-        "Sales_Sheets",
-    ]
-    final_context = ""
-
-    # Prompt to Refresh All Chat Data
     if body.user_response == "refresh":
         sql.clear_messages(cursor, conn)
         sql.init_db(cursor, conn)
+        return {"ai_response": "Chat history cleared."}
 
-    else:
-        chat_history = sql.get_all_messages(cursor)
-        chat_history.append({"role": "user", "content": body.user_response})
+    chat_history = sql.get_all_messages(cursor)
+    chat_history.append({"role": "user", "content": body.user_response})
 
-        # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
-        for collection_name in collection_names:
-            results = query.QueryFunction(
-                query=[body.user_response], collection_name=collection_name
-            )
+    final_context = _build_context(body.user_response)
+    ai_response = await ai_chat.respond(chat_history, final_context)
 
-            docs = (
-                results["documents"][0]
-                if isinstance(results, dict) and results["documents"]
-                else []
-            )
-            context = "\n\n".join(docs) if docs else ""
-
-            final_context += context
-
-        # Findings += final context
-
-        ai_response = await ai.get_ai_response(chat_history, final_context)
-        sql.save_message(cursor, conn, "user", body.user_response)
-        sql.save_message(cursor, conn, "assistant", ai_response)
-
-        print("Ai response is ", ai_response)
-        return {"ai_response": ai_response}
+    sql.save_message(cursor, conn, "user", body.user_response)
+    sql.save_message(cursor, conn, "assistant", ai_response)
+    return {"ai_response": ai_response}
 
 
 @app.get("/generate_insights")
 async def generate_insights():
-    # For Querying Purposes
-    collection_names = [
-        "Company_Description",
-        "Inventory_Sheets",
-        "Balance_Sheets",
-        "Sales_Sheets",
-    ]
-    final_context = ""
-
-    queryText = "sales trends inventory performance"
-    print("Generating insights")
-
-    # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
-    for collection_name in collection_names:
-        results = query.QueryFunction(
-            query=[queryText], collection_name=collection_name
-        )
-
-        docs = (
-            results["documents"][0]
-            if isinstance(results, dict) and results["documents"]
-            else []
-        )
-        context = "\n\n".join(docs) if docs else ""
-
-        final_context += context
-
-    generated_insights = await ai.generate_insights(final_context)
-
-    print("Generated insights are ", generated_insights)
+    final_context = _build_context("sales trends inventory performance")
+    generated_insights = await ai_chat.insights(final_context)
     return {"generated_insights": generated_insights}
 
 
 @app.get("/generate_dashboard")
 async def generate_dashboard():
-    # For Querying Purposes
-    collection_names = [
-        "Company_Description",
-        "Inventory_Sheets",
-        "Balance_Sheets",
-        "Sales_Sheets",
-    ]
-    final_context = ""
-
-    queryText = "sales trends inventory performance"
-    print("Generating dashboard")
-
-    # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
-    for collection_name in collection_names:
-        results = query.QueryFunction(
-            query=[queryText], collection_name=collection_name
-        )
-
-        docs = (
-            results["documents"][0]
-            if isinstance(results, dict) and results["documents"]
-            else []
-        )
-        context = "\n\n".join(docs) if docs else ""
-
-        final_context += context
-
-    generated_dashboard = await ai.generate_dashboard(final_context)
-
-    print("Generated dashboard are ", generated_dashboard)
+    final_context = _build_context("sales trends inventory performance")
+    generated_dashboard = await ai_chat.dashboard(final_context)
     return {"generated_dashboard": generated_dashboard}
 
 
 @app.get("/generate_reports")
 async def generate_reports():
-    # For Querying Purposes
-    collection_names = [
-        "Company_Description",
-        "Inventory_Sheets",
-        "Balance_Sheets",
-        "Sales_Sheets",
-    ]
-    final_context = ""
-
-    queryText = "sales trends inventory performance"
-    print("Generating dashboard")
-
-    # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
-    for collection_name in collection_names:
-        results = query.QueryFunction(
-            query=[queryText], collection_name=collection_name
-        )
-
-        docs = (
-            results["documents"][0]
-            if isinstance(results, dict) and results["documents"]
-            else []
-        )
-        context = "\n\n".join(docs) if docs else ""
-
-        final_context += context
-
-    await ai.generate_newsletter(final_context)
+    final_context = _build_context("sales trends inventory performance")
+    await ai_report.generate(final_context)
     return {"status": "ok"}

@@ -26,16 +26,16 @@ class DocumentParser:
             bal_bytes = await balance_sheet.read()
 
             # Parse bytes
-            company_description = await DocumentParser._read_pdf_or_docx(
+            company_description = DocumentParser._read_pdf_or_docx(
                 desc_filename, desc_bytes
             )
-            inventory_data = await DocumentParser._read_csv_or_xlsx(
+            inventory_data = DocumentParser._read_csv_or_xlsx(
                 inv_filename, inv_bytes
             )
-            sales_data = await DocumentParser._read_csv_or_xlsx(
+            sales_data = DocumentParser._read_csv_or_xlsx(
                 sales_filename, sales_bytes
             )
-            balance_sheet_data = await DocumentParser._read_csv_or_xlsx(
+            balance_sheet_data = DocumentParser._read_csv_or_xlsx(
                 bal_filename, bal_bytes
             )
 
@@ -46,19 +46,10 @@ class DocumentParser:
             print("Error initialising data ", e)
             return None, None, None, None
 
-    @staticmethod
-    async def upload_df_to_chromadb(df: pd.DataFrame, collection, source_filename: str):
-        for i, row in df.iterrows():
-            collection.add(
-                documents=[str(row.to_dict())],
-                ids=[f"{source_filename}_row_{i}"],
-                metadatas=[{"source": source_filename, "row": i}],
-            )
-
     # Private helper functions ──────────────────────────────────────────────────────────────────
     # Company description
     @staticmethod
-    async def _read_pdf_or_docx(filename: str, file_bytes: bytes) -> str | None:
+    def _read_pdf_or_docx(filename: str, file_bytes: bytes) -> str | None:
         ext = filename.split(".")[-1].lower()
         if ext == "pdf":
             return DocumentParser._extract_from_pdf(file_bytes)
@@ -72,9 +63,7 @@ class DocumentParser:
 
     # Inventory, Sales, Balance sheets
     @staticmethod
-    async def _read_csv_or_xlsx(
-        filename: str, file_bytes: bytes
-    ) -> pd.DataFrame | None:
+    def _read_csv_or_xlsx(filename: str, file_bytes: bytes) -> pd.DataFrame | None:
         ext = filename.split(".")[-1].lower()
         if ext == "csv":
             return pd.read_csv(io.BytesIO(file_bytes))

@@ -12,10 +12,9 @@ load_dotenv()  # Needed by imports
 
 import asyncio
 
-from .apis import lazada_products
+from pricing_strategy.apis import lazada_products
 from cache_manager import CacheManager
-from .fetch_all_apis import fetch_all
-
+from pricing_strategy.fetch_all_apis import fetch_all
 from pricing_strategy.ai_pricing_strategy import summarise_products
 
 # APIs
