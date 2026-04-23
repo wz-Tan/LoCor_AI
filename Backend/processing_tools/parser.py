@@ -64,6 +64,8 @@ class DocumentParser:
             return DocumentParser._extract_from_pdf(file_bytes)
         elif ext in ["doc", "docx"]:
             return DocumentParser._extract_from_doc(file_bytes)
+        elif ext == "txt":
+            return DocumentParser._extract_from_txt(file_bytes)
         else:
             print(f"Unsupported description file format: {ext}")
             return None
@@ -93,7 +95,13 @@ class DocumentParser:
         doc = Document(io.BytesIO(file_bytes))
         return "\n".join(para.text for para in doc.paragraphs)
 
+    @staticmethod
+    def _extract_from_txt(file_bytes: bytes) -> str:
+        return file_bytes.decode("utf-8")
+
     # Converting a Dataframe into A List Of Strings
     @staticmethod
-    def _parse_dataframe(df: pd.DataFrame):
+    def _parse_dataframe(df: pd.DataFrame | None) -> str:
+        if df is None or df.empty:
+            return ""
         return df.to_string()
