@@ -7,30 +7,36 @@
 ## 🌟 Key Features
 
 ### 1. Unified Data Ingestion
+
 - **Multi-Format Support**: Effortlessly upload and parse PDF/DOCX company descriptions and CSV/XLSX spreadsheets for Inventory, Sales, and Balance Sheets.
 - **Automated Processing**: Uses `pandas` for dataframes and `PyMuPDF` / `python-docx` for document text extraction.
 
 ### 2. RAG-Powered Business Intelligence
-- **Semantic Search**: Powered by **ChromaDB**, the system performs Retrieval-Augmented Generation (RAG) to provide context-aware answers based on *your* specific business data.
+
+- **Semantic Search**: Powered by **ChromaDB**, the system performs Retrieval-Augmented Generation (RAG) to provide context-aware answers based on _your_ specific business data.
 - **Intelligent Chat**: An interactive assistant that understands your business context. Ask about stock levels, sales trends, or future procurement needs.
 
 ### 3. Automated Dashboard & Insights
+
 - **Trend Analysis**: Real-time identification of trending, stable, or slowing product categories.
 - **Actionable Advice**: Direct recommendations (Buy, Hold, Reduce, Watch) written like a professional consultant.
 - **Inventory Health**: Visual tracking of stock status (Critical, Excess, OK) based on capacity and current levels.
 
 ### 4. Market & Competitive Intelligence
+
 - **Real-time API Integration**: Fetches live competitor data from platforms like Lazada.
 - **Pricing Strategist**: AI-driven analysis of the competitive landscape, providing exact RM pricing recommendations and profit margin analysis.
 - **Supply Gap Identification**: Pinpoints when competitors are out of stock to help you capture "orphaned demand."
 
 ### 5. AI-Driven Automation
+
 - **Report Generation**: Automatically generates professional Word reports and Excel spreadsheets via AI tool calls.
 - **Seamless Distribution**: Integrated with **Resend** to email generated reports and spreadsheets directly to stakeholders.
 
 ---
 
 ## System Architecture
+
 ![System Architecture](architecture.png)
 
 ---
@@ -38,12 +44,14 @@
 ## 🛠️ Tech Stack
 
 ### Frontend
+
 - **Framework**: React 19 (Vite)
 - **Routing**: React Router 7
 - **Styling**: TailwindCSS 4
 - **State Management**: React Hooks & Context
 
 ### Backend
+
 - **API Framework**: FastAPI (Python 3.10+)
 - **Vector Database**: ChromaDB (for RAG)
 - **SQL Database**: SQLite (for chat history)
@@ -51,6 +59,7 @@
 - **AI Models**: Z.ai (GLM-4.5-Flash)
 
 ### Processing & Tools
+
 - **Data Science**: Pandas, NumPy
 - **Document Parsing**: PyMuPDF (fitz), python-docx
 - **Email Service**: Resend API
@@ -61,6 +70,7 @@
 ## 🚀 Getting Started
 
 ### Prerequisites
+
 - Python 3.10+
 - Node.js & npm
 - Redis Server (running on localhost:6379)
@@ -68,6 +78,7 @@
 - [Resend API Key](https://resend.com/)
 
 ### Backend Setup
+
 1. Navigate to the `Backend` directory.
 2. Create a `.env` file based on `.env.example`:
    ```env
@@ -85,6 +96,7 @@
    ```
 
 ### Frontend Setup
+
 1. Navigate to the `front_end` directory.
 2. Install dependencies:
    ```bash
@@ -102,6 +114,7 @@
 ## Mac
 
 ### Install
+
 ```bash
 # Install Homebrew if not already installed
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
@@ -111,22 +124,26 @@ brew install redis
 ```
 
 ### Start
+
 ```bash
 brew services start redis
 ```
 
 ### Verify
+
 ```bash
 redis-cli ping
 # Expected: PONG
 ```
 
 ### Stop
+
 ```bash
 brew services stop redis
 ```
 
 ### Restart
+
 ```bash
 brew services restart redis
 ```
@@ -136,6 +153,7 @@ brew services restart redis
 ## Windows
 
 ### Install
+
 ```powershell
 # 1. Open PowerShell as Administrator and enable WSL2
 wsl --install
@@ -146,22 +164,26 @@ sudo apt install redis-server -y
 ```
 
 ### Start
+
 ```bash
 sudo service redis-server start
 ```
 
 ### Verify
+
 ```bash
 redis-cli ping
 # Expected: PONG
 ```
 
 ### Stop
+
 ```bash
 sudo service redis-server stop
 ```
 
 ### Restart
+
 ```bash
 sudo service redis-server restart
 ```
@@ -173,33 +195,39 @@ sudo service redis-server restart
 ## Linux (Ubuntu/Debian)
 
 ### Install
+
 ```bash
 sudo apt update
 sudo apt install redis-server -y
 ```
 
 ### Start
+
 ```bash
 sudo systemctl start redis
 ```
 
 ### Enable auto-start on reboot
+
 ```bash
 sudo systemctl enable redis
 ```
 
 ### Verify
+
 ```bash
 redis-cli ping
 # Expected: PONG
 ```
 
 ### Stop
+
 ```bash
 sudo systemctl stop redis
 ```
 
 ### Restart
+
 ```bash
 sudo systemctl restart redis
 ```
@@ -234,7 +262,7 @@ LoCor_AI/
 │   ├── server.py    # FastAPI backend server
 │   ├── chat_history/
 │   │   └── sql.py   # Storage for chat messages
-│   ├── data_apis/
+│   ├── pricing_strategy/
 │   │   ├── ai_summarise.py   # AI logic for summarizing APIs
 │   │   ├── fetch_all_apis.py    # Orchestrate fetching of APIs
 │   │   ├── main.py

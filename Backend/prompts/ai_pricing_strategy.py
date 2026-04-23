@@ -1,7 +1,7 @@
 import json
 
 # ========== YOUR COMPANY DATA ==========
-your_product = {
+USER_DATA = {
     "platform": "Lazada",
     "products": [{
         "product_name": "PowerCore 20K Pro",
@@ -18,7 +18,7 @@ your_product = {
 }
 
 # ========== COMPETITOR DATA (Lazada Format) ==========
-competitor_data = {
+COMPETITOR_DATA = {
     "platform": "Lazada",
     "search_keyword": "20000mah power bank built in cable",
     "products": [
@@ -71,11 +71,12 @@ competitor_data = {
 }
 
 # ========== PROMPT ==========
-PROMPT = f"""
+def prompt_with_data(user_data, competitor_data) -> str:
+    return f"""
 You are an AI pricing strategist for a Malaysian e-commerce business selling on Lazada.
 
 === YOUR PRODUCT (Current Position) ===
-{json.dumps(your_product, indent=2)}
+{json.dumps(user_data, indent=2)}
 
 === COMPETITOR DATA FROM LAZADA ===
 {json.dumps(competitor_data, indent=2)}
