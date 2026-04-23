@@ -516,18 +516,18 @@ export default function Chat() {
               <span className="nav-icon">⊕</span> Upload Data
             </button>
           </nav>
-          <div className="sidebar-footer">LoCoAI · SME Edition</div>
+          <div className="sidebar-footer">LoCorAI · SME Edition</div>
         </aside>
 
         <div className={`chat-main ${sidebarOpen ? "" : "collapsed"}`}>
           <div className="chat-header">
             <div>
-              <div className="chat-header-title">LoCoAI Assistant</div>
+              <div className="chat-header-title">LoCorAI Assistant</div>
               <div className="chat-header-sub">
                 Answers based on your uploaded business data
               </div>
             </div>
-            <span className="model-badge">LoCoAI · GLM</span>
+            <span className="model-badge">LoCorAI · GLM</span>
           </div>
 
           <div className="messages-wrap">

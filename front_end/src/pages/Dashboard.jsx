@@ -279,7 +279,7 @@ export default function Dashboard() {
               </button>
             ))}
           </nav>
-          <div className="sidebar-footer">LoCoAI · SME Edition</div>
+          <div className="sidebar-footer">LoCorAI · SME Edition</div>
         </aside>
 
         <main className={`main ${sidebarOpen ? "" : "collapsed"}`}>
