@@ -25,7 +25,7 @@ def init_db(cursor, conn):
                 "INSERT INTO messages (role, content) VALUES (?, ?)",
                 (
                     "assistant",
-                    "Hello! I'm your LoCoAI assistant. Ask me anything about your inventory, trends, or recommendations.",
+                    "Hello! I'm your LoCorAI assistant. Ask me anything about your inventory, trends, or recommendations.",
                 ),
             )
             conn.commit()

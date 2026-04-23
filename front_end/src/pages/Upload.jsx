@@ -160,7 +160,7 @@ export default function App() {
               <p className="step-indicator">Step 01 — Identity</p>
               <h2 className="card-title">What's your business called?</h2>
               <p className="card-subtitle">
-                This helps LoCoAI personalise every report and recommendation to
+                This helps LoCorAI personalise every report and recommendation to
                 your company.
               </p>
               <label className="field-label">Company name</label>
@@ -277,7 +277,7 @@ export default function App() {
                 onClick={handleSubmit}
               >
                 {allFilesFilled
-                  ? "Initialise LoCoAI →"
+                  ? "Initialise LoCorAI →"
                   : "Upload all 4 documents to continue"}
               </button>
               <button className="btn-back" onClick={() => isReupload ? navigate("/dashboard") : setStep(2)}>
