@@ -1,5 +1,6 @@
 import json
 import os
+import re
 
 from dotenv import load_dotenv
 from processing_generation import generate, newsletter
@@ -28,7 +29,7 @@ async def get_ai_response(chat_history, context):
             messages[0] = {
                 "role": "system",
                 "content": messages[0]["content"]
-                + f"\n\nRelevant business data:\n\n{context}",
+                          + f"\n\nRelevant business data:\n\n{context}",
             }
         else:
             messages.insert(
@@ -62,19 +63,12 @@ async def generate_insights(context):
     )
 
     raw = response.choices[0].message.content
-    clean = (
-        raw.strip()
-        .removeprefix("```json")
-        .removeprefix("```")
-        .removesuffix("```")
-        .strip()
-    )
-
-    return json.loads(clean)
+    return json.loads(_clean_json(raw))
 
 
 # Generate Newsletter (Context is Synthesized Data from ChromaDB + Trends)
 async def generate_newsletter(context):
+    # General docx
     document_messages = [
         {"role": "system", "content": DOCUMENT_PROMPT},
         {
@@ -82,18 +76,9 @@ async def generate_newsletter(context):
             "content": f"Here is the business context. Take this as a crucial point of information:\n\n{context}",
         },
     ]
+    report_content = _ai_generate(document_messages)
 
-    # Create Proposal Content
-    response = client.chat.completions.create(
-        model="glm-4.5-flash",
-        messages=document_messages,
-        thinking={"type": "disabled"},
-        max_tokens=2000,
-    )
-
-    report_content = response.choices[0].message.content
-
-    # Create Excel Content
+    # Generate excel
     excel_messages = [
         {"role": "system", "content": EXCEL_PROMPT},
         {
@@ -101,15 +86,7 @@ async def generate_newsletter(context):
             "content": f"Here is the business context. Take this as a crucial point of information and strictly follow it:\n\n{context}. Follow this business proposal {report_content}",
         },
     ]
-
-    response = client.chat.completions.create(
-        model="glm-4.5-flash",
-        messages=excel_messages,
-        thinking={"type": "disabled"},
-        max_tokens=2000,
-    )
-
-    excel_content = response.choices[0].message.content
+    excel_content = _ai_generate(excel_messages)
 
     # Parse Them into Buffers
     word_buffer = generate.generate_doc(report_content)
@@ -134,11 +111,19 @@ async def generate_dashboard(context):
     )
 
     raw = response.choices[0].message.content
-    clean = (
-        raw.strip()
-        .removeprefix("```json")
-        .removeprefix("```")
-        .removesuffix("```")
-        .strip()
+    return json.loads(_clean_json(raw))
+
+
+# Helper functions
+def _clean_json(raw: str) -> str:
+    return re.sub(r"^```(?:json)?\s*|\s*```$", "", raw.strip())
+
+
+def _ai_generate(messages):
+    response = client.chat.completions.create(
+        model="glm-4.5-flash",
+        messages=messages,
+        thinking={"type": "disabled"},
+        max_tokens=2000,
     )
-    return json.loads(clean)
+    return response.choices[0].message.content
