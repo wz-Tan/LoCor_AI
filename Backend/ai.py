@@ -309,7 +309,9 @@ async def generate_dashboard(context):
           "dir": "up | down | neutral",
           "label": "↑ Trending | ↓ Slowing | → Stable",
           "desc": "2-3 sentence observation about this category based on the data",
-          "competitor": "one line about competitor activity if relevant, or null"
+          "competitor": "one line about competitor activity or competitor pricing if relevant, or null",
+          "priceAction": "up | down | hold",
+          "priceSuggestion": "one concrete sentence — e.g. 'Consider raising prices by 5–10% given strong demand and low stock.' or 'Hold pricing steady, competitors are undercutting this segment.'"
         }
       ]
     }
@@ -318,7 +320,11 @@ async def generate_dashboard(context):
     - stats: always include 4 entries — Monthly Revenue, Total Sales (units), Top Category Revenue, and Items Needing Reorder. Derive all values from the data.
     - salesByCategory: one entry per product category. pct is that category's share of total revenue as a whole number (0–100).
     - topProducts: top 5 products by units sold.
-    - trends: one entry per product category. desc should read like a trusted advisor, not a report. competitor should be one concise line or null.
+    - trends: one entry per product category.
+        - desc should read like a trusted advisor, not a report.
+        - competitor should note any competitor pricing behaviour if observable, or null.
+        - priceAction must be "up", "down", or "hold" — based on demand trend, stock level, and competitor positioning.
+        - priceSuggestion must be a single actionable sentence with a specific % range or clear rationale. Never vague.
     - All monetary values must be formatted as "RM X,XXX" with comma separators.
     - Keep language concise and practical — this is for a busy SME owner.
     """
