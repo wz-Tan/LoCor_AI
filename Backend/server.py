@@ -15,6 +15,10 @@ from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
 from processing_tools.parser import DocumentParser
 from pydantic import BaseModel
+from apis import fetch_all, lazada_prices
+from cache_manager import CacheManager
+from fastapi.responses import StreamingResponse
+from prompts.ai_pricing_strategy import prompt_with_data
 
 
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
@@ -26,7 +30,12 @@ class UserMessage(BaseModel):
     user_response: str
 
 
+class ProductDetails(BaseModel):
+    product_name: str
+
+
 COLLECTION_NAMES = ["Company_Description", "Inventory_Sheets", "Balance_Sheets", "Sales_Sheets"]
+PRICING_APIS = [lazada_prices]
 
 
 @asynccontextmanager
@@ -144,3 +153,39 @@ async def generate_reports():
     final_context = _build_context("sales trends inventory performance")
     await ai_report.generate(final_context)
     return {"status": "ok"}
+
+
+# Price comparison return stream by stream
+@app.post('/pricing-strategy/stream')
+async def stream_pricing_strategy(product_details: ProductDetails):
+    cache_key = f"pricing:{product_details.product_name}"
+
+    cached = CacheManager.serve_cache(cache_key)
+    if cached:
+        async def cached_stream():
+            yield cached
+        return StreamingResponse(cached_stream(), media_type="text/plain")
+
+    competitor_data = await fetch_all(PRICING_APIS, query=product_details.product_name)
+    if not competitor_data:
+        async def error_stream():
+            yield "All pricing APIs failed to respond."
+        return StreamingResponse(error_stream(), media_type="text/plain")
+
+    async def live_stream():
+        result = ""
+        response = ai_chat.client.chat.completions.create(
+            model="glm-4.5-flash",
+            messages=[{"role": "user", "content": prompt_with_data(product_details, competitor_data)}],
+            thinking={"type": "disabled"},
+            max_tokens=2000,
+            temperature=0.5,
+            stream=True,
+        )
+        for chunk in response:
+            delta = chunk.choices[0].delta.content or ""
+            result += delta
+            yield delta
+        CacheManager.store_cache(cache_key, result)
+
+    return StreamingResponse(live_stream(), media_type="text/plain")
