@@ -3,6 +3,7 @@
 import { getDashboard } from "./dashboard";
 import { generateReports } from "./documents";
 import { getInsights } from "./insights";
+import { getPricing } from "./pricing";
 
 const ENDPOINT = 8000;
 
@@ -49,10 +50,11 @@ export async function init(
   await getInsights();
 
   onStep(2); // "Analysing your inventory"
-  await getDashboard();
+  await getPricing();
 
   onStep(3); // "Generating recommendations"
   await generateReports();
 
   onStep(4); // "Building your dashboard"
+  await getDashboard();
 }
