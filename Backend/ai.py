@@ -91,7 +91,6 @@ async def generate_insights(context):
     - Keep language concise and practical — this is for a busy SME owner, not a report
     """
 
-    # TODO: Add Trend Fetches Here Too
     messages = [
         {"role": "system", "content": INSIGHTS_PROMPT},
         {"role": "user", "content": f"Here is the business data:\n\n{context}"},
@@ -265,3 +264,84 @@ async def generate_newsletter(context):
 
     # Send Email
     newsletter.send_email(word_buffer, excel_buffer)
+
+
+async def generate_dashboard(context):
+    DASHBOARD_PROMPT = """
+    You are a professional market analyst consulting for an SME business owner.
+    Based on the business data provided, generate a JSON object with exactly this structure and nothing else. No explanation, no markdown, no extra text — only the raw JSON object.
+    {
+      "greeting": "Good morning 👋",
+      "subtitle": "Here's your business health check for today.",
+      "lastUpdated": "Updated DD Mon YYYY, H:MM AM/PM",
+
+      "stats": [
+        {
+          "label": "metric name e.g. Monthly Revenue",
+          "value": "formatted value e.g. RM 45,200",
+          "change": "e.g. ↑ 12% vs last month",
+          "dir": "up | down | neutral",
+          "sub": "optional one-line footnote e.g. RM 1,506/day avg, or null"
+        }
+      ],
+
+      "salesByCategory": [
+        {
+          "name": "category name",
+          "value": "RM X,XXX",
+          "change": "e.g. ↑ 8%",
+          "dir": "up | down | neutral",
+          "pct": 0
+        }
+      ],
+
+      "topProducts": [
+        {
+          "name": "product name",
+          "units": 0,
+          "revenue": "RM X,XXX"
+        }
+      ],
+
+      "trends": [
+        {
+          "name": "category name",
+          "dir": "up | down | neutral",
+          "label": "↑ Trending | ↓ Slowing | → Stable",
+          "desc": "2-3 sentence observation about this category based on the data",
+          "competitor": "one line about competitor activity if relevant, or null"
+        }
+      ]
+    }
+
+    Rules:
+    - stats: always include 4 entries — Monthly Revenue, Total Sales (units), Top Category Revenue, and Items Needing Reorder. Derive all values from the data.
+    - salesByCategory: one entry per product category. pct is that category's share of total revenue as a whole number (0–100).
+    - topProducts: top 5 products by units sold.
+    - trends: one entry per product category. desc should read like a trusted advisor, not a report. competitor should be one concise line or null.
+    - All monetary values must be formatted as "RM X,XXX" with comma separators.
+    - Keep language concise and practical — this is for a busy SME owner.
+    """
+
+    messages = [
+        {"role": "system", "content": DASHBOARD_PROMPT},
+        {"role": "user", "content": f"Here is the business data:\n\n{context}"},
+    ]
+
+    response = client.chat.completions.create(
+        model="glm-4.5-flash",
+        messages=messages,
+        thinking={"type": "disabled"},
+        max_tokens=2500,
+        temperature=0.3,
+    )
+
+    raw = response.choices[0].message.content
+    clean = (
+        raw.strip()
+        .removeprefix("```json")
+        .removeprefix("```")
+        .removesuffix("```")
+        .strip()
+    )
+    return json.loads(clean)

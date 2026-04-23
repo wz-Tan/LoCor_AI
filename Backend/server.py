@@ -188,7 +188,7 @@ async def generate_insights():
     final_context = ""
 
     queryText = "sales trends inventory performance"
-    print("Generating newsletter")
+    print("Generating insights")
 
     # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
     for collection_name in collection_names:
@@ -209,6 +209,41 @@ async def generate_insights():
 
     print("Generated insights are ", generated_insights)
     return {"generated_insights": generated_insights}
+
+
+@app.get("/generate_dashboard")
+async def generate_dashboard():
+    # For Querying Purposes
+    collection_names = [
+        "Company_Description",
+        "Inventory_Sheets",
+        "Balance_Sheets",
+        "Sales_Sheets",
+    ]
+    final_context = ""
+
+    queryText = "sales trends inventory performance"
+    print("Generating dashboard")
+
+    # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
+    for collection_name in collection_names:
+        results = query.QueryFunction(
+            query=[queryText], collection_name=collection_name
+        )
+
+        docs = (
+            results["documents"][0]
+            if isinstance(results, dict) and results["documents"]
+            else []
+        )
+        context = "\n\n".join(docs) if docs else ""
+
+        final_context += context
+
+    generated_dashboard = await ai.generate_dashboard(final_context)
+
+    print("Generated dashboard are ", generated_dashboard)
+    return {"generated_dashboard": generated_dashboard}
 
 
 if __name__ == "__main__":
