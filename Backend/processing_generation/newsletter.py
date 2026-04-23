@@ -4,7 +4,7 @@ from datetime import date
 
 import resend
 from dotenv import load_dotenv
-from pandas.io.common import BytesIO
+from io import BytesIO
 
 # Initialise Environment
 load_dotenv()
@@ -31,7 +31,7 @@ def send_email(reportBuffer: BytesIO, spreadsheetBuffer: BytesIO) -> None:
 
     spreadsheet_attachment: resend.Attachment = {
         "content": list(spreadsheet),
-        "filename": f"Spreadsheet_For_{today}.docx",
+        "filename": f"Spreadsheet_For_{today}.xlsx",
     }
 
     # Email content
