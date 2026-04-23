@@ -2,16 +2,19 @@ import json
 
 # ========== YOUR COMPANY DATA ==========
 your_product = {
-    "product_name": "PowerCore 20K Pro",
-    "brand": "VoltEdge",
-    "description": "20000mAh power bank, dual USB-A, USB-C PD 20W, built-in Lightning and USB-C cables, LED display",
-    "cost_per_unit": 28.50,
-    "current_selling_price": 59.90,
-    "current_profit_margin_percent": 52.4,
-    "profit_per_unit": 31.40,
-    "monthly_sales_volume": 85,
-    "inventory_level": 210,
-    "inventory_holding_cost_per_unit": 0.85
+    "platform": "Lazada",
+    "products": [{
+        "product_name": "PowerCore 20K Pro",
+        "brand": "VoltEdge",
+        "description": "20000mAh power bank, dual USB-A, USB-C PD 20W, built-in Lightning and USB-C cables, LED display",
+        "cost_per_unit": 28.50,
+        "current_selling_price": 59.90,
+        "current_profit_margin_percent": 52.4,
+        "profit_per_unit": 31.40,
+        "monthly_sales_volume": 85,
+        "inventory_level": 210,
+        "inventory_holding_cost_per_unit": 0.85
+    }]
 }
 
 # ========== COMPETITOR DATA (Lazada Format) ==========

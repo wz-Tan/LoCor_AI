@@ -3,6 +3,8 @@ import os
 
 from json_toon import json_to_toon
 from zai import ZaiClient  # type: ignore
+from TEST_DATA import your_product
+
 
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
 
@@ -15,7 +17,7 @@ def convert_to_toon(all_platform_data: list[dict]) -> str:
     for platform_data in all_platform_data:
         products = [
             {**t, "keywords": ",".join(t.get("keywords", []))}
-            for t in platform_data.get("products", [])[:15]
+            for t in platform_data.get("products", [])
         ]
         header = f"\n\n### {platform_data['platform']}\n"
         toon_text += header + json_to_toon(products) + "\n"
@@ -30,11 +32,12 @@ def convert_to_toon(all_platform_data: list[dict]) -> str:
     return toon_text
 
 
-def summarise_products(all_platform_data: list[dict]) -> str:
+def summarise_products(all_products: list[dict], testing: bool = False) -> str:
     # Convert data to toon
-    all_products = convert_to_toon(all_platform_data)
-
-    from TEST_DATA import your_product
+    try:
+        all_products = convert_to_toon(all_products)
+    except AttributeError:
+        print('Failed to convert to TOON.\n')
 
     prompt = f"""
 You are an AI pricing strategist for a Malaysian e-commerce business selling on Lazada.
@@ -77,36 +80,16 @@ Answer these questions in order:
 
 Be specific. Reference actual numbers from the data. Avoid generic advice.
 """
+    # Test data
+    if testing:
+        from TEST_DATA import PROMPT
+        prompt = PROMPT
 
     response = client.chat.completions.create(
         model="glm-4.5-flash",
         messages=[{"role": "user", "content": prompt}],
         thinking={"type": "disabled"},
         max_tokens=2000,
-        temperature=0.5,
-        stream=True,
-    )
-
-    # Print stream by stream
-    result = ""
-    for chunk in response:
-        delta = chunk.choices[0].delta.content or ""
-        print(delta, end="", flush=True)
-        result += delta
-    return result
-
-    # If not using stream
-    # return response.choices[0].message.content
-
-
-def test_summarise() -> str:
-    from TEST_DATA import PROMPT
-
-    response = client.chat.completions.create(
-        model="glm-4.5-flash",
-        messages=[{"role": "user", "content": PROMPT}],
-        thinking={"type": "disabled"},
-        max_tokens=4000,
         temperature=0.5,
         stream=True,
     )
