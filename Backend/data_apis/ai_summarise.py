@@ -1,7 +1,7 @@
 import json
 import os
 
-from toon import encode
+from json_toon import json_to_toon
 from zai import ZaiClient  # type: ignore
 
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
@@ -18,7 +18,7 @@ def convert_to_toon(all_platform_data: list[dict]) -> str:
             for t in platform_data.get("products", [])[:15]
         ]
         header = f"\n\n### {platform_data['platform']}\n"
-        toon_text += header + encode(products) + "\n"
+        toon_text += header + json_to_toon(products) + "\n"
         json_text += header + json.dumps(products) + "\n"
 
     # Compare
@@ -70,7 +70,7 @@ Answer these questions in order:
    - What is the maximum price drop we could sustain before hitting break-even on current volume?
 
 5. Supply Gap Analysis: Is any competitor OUT OF STOCK at a key price point? If yes, how can we capture their orphaned demand?
-   
+
 6. **Execution Strategy**
    - What should we change in our Lazada listing (title, image, description) to support this price?
    - What promotion or campaign would maximize this opportunity?
