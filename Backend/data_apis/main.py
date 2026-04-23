@@ -1,7 +1,6 @@
 import asyncio
 from dotenv import load_dotenv
-import time
-from redis import Redis
+from cache_manager import CacheManager
 
 load_dotenv()  # Needed by imports
 
@@ -15,38 +14,24 @@ else:
     from ai_summarise import summarise_products
     from apis import lazada_products
 
-# Constants
+
+# APIs
 ACTIVE_APIS = [lazada_products]  # Modify if for debug
-PRODUCTS_CACHE_KEY = 'cached_products'
-PRODUCTS_TTL = 60 * 60    # 1 hour
-
-# Setup redis
-redis_client = Redis(host='localhost', port=6379, db=0)
+CACHE_KEY = 'cached_products'
 
 
-# Serve cached products if present
-async def serve_cached_products(cached) -> str:
-    print('✅ Products served from cache\n')
-    text = cached.decode('utf-8')
+async def main(testing: bool = False) -> str:
+    # Test
+    if testing:
+        from TEST_DATA import competitor_data
+        return summarise_products(competitor_data, testing=True)
 
-    # Mimic AI print
-    for char in text:
-        print(char, end='', flush=True)
-        time.sleep(0.01)
-    print()
-
-    return text
-
-
-async def main() -> str:
-    # For test
-    # from ai_summarise import test_summarise
-    # return test_summarise()
-    # For test
-
-    cached = redis_client.get(PRODUCTS_CACHE_KEY)
+    # Cache if got
+    cached = CacheManager.serve_cache(CACHE_KEY)
     if cached:
-        return await serve_cached_products(cached)
+        print('✅ Products served from cache\n')
+        print(cached, end='\n\n')
+        return cached
 
     # Fetch APIs
     print('Fetching products from all platforms...')
@@ -56,10 +41,11 @@ async def main() -> str:
     print(f'✅ Got data from {len(data)} platforms. Summarising...\n')
     products = summarise_products(data)
 
-    # Add to redis
-    redis_client.setex(PRODUCTS_CACHE_KEY, PRODUCTS_TTL, products)
+    # Store cache
+    CacheManager.store_cache(CACHE_KEY, products)
+
     return products
 
 
 if __name__ == '__main__':
-    asyncio.run(main())
+    asyncio.run(main(testing=True))
