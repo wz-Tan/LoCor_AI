@@ -3,8 +3,8 @@ import os
 
 from dotenv import load_dotenv
 from processing_generation import generate, newsletter
+from prompts.ai import DASHBOARD_PROMPT, DOCUMENT_PROMPT, EXCEL_PROMPT, INSIGHTS_PROMPT
 from zai import ZaiClient
-from prompts.ai import INSIGHTS_PROMPT, DOCUMENT_PROMPT, EXCEL_PROMPT, DASHBOARD_PROMPT
 
 load_dotenv()
 
@@ -129,7 +129,7 @@ async def generate_dashboard(context):
         model="glm-4.5-flash",
         messages=messages,
         thinking={"type": "disabled"},
-        max_tokens=2500,
+        max_tokens=5000,
         temperature=0.3,
     )
 
