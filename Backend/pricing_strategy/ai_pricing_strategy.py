@@ -40,13 +40,13 @@ def summarise_products(all_products: list[dict]) -> str:
 
     # AI
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=[{
             "role": "user",
             "content": prompt_with_data(USER_DATA, all_products)
         }],
         thinking={"type": "disabled"},
-        max_tokens=2000,
+        max_tokens=5000,
         temperature=0.5,
         stream=True,
     )

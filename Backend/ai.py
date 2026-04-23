@@ -11,10 +11,10 @@ load_dotenv()
 # Get this API Key from This Link (+ Documentation)
 # https://docs.z.ai/guides/overview/quick-start
 API_KEY = os.getenv("Z_AI_API_KEY")
-AI_ENDPOINT = "https://api.z.ai/api/paas/v4/"
+AI_ENDPOINT = "https://api.ilmu.ai/v1"
 
 # Create Client Instance
-client = ZaiClient(api_key=API_KEY)
+client = ZaiClient(api_key=API_KEY, base_url=AI_ENDPOINT)
 
 
 # Talk to the AI
@@ -38,9 +38,9 @@ async def get_ai_response(chat_history, context):
 
     # Create chat completion
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=messages,
-        max_tokens=2048,
+        max_tokens=5000,
         temperature=0.5,
     )
 
@@ -48,20 +48,23 @@ async def get_ai_response(chat_history, context):
 
 
 async def generate_insights(context):
+
     messages = [
         {"role": "system", "content": INSIGHTS_PROMPT},
         {"role": "user", "content": f"Here is the business data:\n\n{context}"},
     ]
 
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=messages,
         thinking={"type": "disabled"},
-        max_tokens=2000,  # needs more room for full JSON
+        max_tokens=10000,  # needs more room for full JSON
         temperature=0.3,  # lower = more consistent JSON output
     )
 
+    print("Response is ", response)
     raw = response.choices[0].message.content
+    print("Raw insight is ", raw)
     clean = (
         raw.strip()
         .removeprefix("```json")
@@ -85,10 +88,10 @@ async def generate_newsletter(context):
 
     # Create Proposal Content
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=document_messages,
         thinking={"type": "disabled"},
-        max_tokens=2000,
+        max_tokens=5000,
     )
 
     report_content = response.choices[0].message.content
@@ -103,10 +106,10 @@ async def generate_newsletter(context):
     ]
 
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=excel_messages,
         thinking={"type": "disabled"},
-        max_tokens=2000,
+        max_tokens=5000,
     )
 
     excel_content = response.choices[0].message.content
@@ -126,7 +129,7 @@ async def generate_dashboard(context):
     ]
 
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=messages,
         thinking={"type": "disabled"},
         max_tokens=5000,

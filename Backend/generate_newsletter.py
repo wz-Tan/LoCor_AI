@@ -18,10 +18,10 @@ FUNCTION_MAP = {
 # Get this API Key from This Link (+ Documentation)
 # https://docs.z.ai/guides/overview/quick-start
 API_KEY = os.getenv("Z_AI_API_KEY")
-AI_ENDPOINT = "https://api.z.ai/api/paas/v4/"
+AI_ENDPOINT = "https://api.ilmu.ai/v1"
 
 # Create Client Instance
-client = ZaiClient(api_key=API_KEY)
+client = ZaiClient(api_key=API_KEY, base_url=AI_ENDPOINT)
 
 
 async def main():
@@ -64,7 +64,7 @@ async def main():
 
     # Create Proposal Content
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=document_messages,
         thinking={"type": "disabled"},
         max_tokens=8000,
@@ -91,7 +91,7 @@ async def main():
     ]
 
     response = client.chat.completions.create(
-        model="glm-4.5-flash",
+        model="ilmu-glm-5.1",
         messages=excel_messages,
         thinking={"type": "disabled"},
         max_tokens=8000,

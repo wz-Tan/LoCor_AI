@@ -56,7 +56,7 @@
 - **Vector Database**: ChromaDB (for RAG)
 - **SQL Database**: SQLite (for chat history)
 - **Caching**: Redis (for API product data)
-- **AI Models**: Z.ai (GLM-4.5-Flash)
+- **AI Models**: Z.ai (ilmu-glm-5.1)
 
 ### Processing & Tools
 
