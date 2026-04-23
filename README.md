@@ -262,21 +262,20 @@ LoCor_AI/
 │   ├── server.py    # FastAPI backend server
 │   ├── chat_history/
 │   │   └── sql.py   # Storage for chat messages
-│   ├── pricing_strategy/
-│   │   ├── ai_summarise.py   # AI logic for summarizing APIs
-│   │   ├── fetch_all_apis.py    # Orchestrate fetching of APIs
-│   │   ├── main.py
-│   │   ├── TEST_DATA.py   # Sample data to test AI summarization
-│   │   └── apis/    # Individual API files
 │   ├── db/
 │   │   ├── data_feeder.py    # Store business data into ChromaDB
 │   │   └── query.py    # Vector search queries for RAG
+│   ├── pricing_strategy/
+│   │   ├── ai_pricing_strategy.py   # AI logic for summarizing APIs
+│   │   ├── fetch_all_apis.py    # Orchestrate fetching of APIs
+│   │   ├── main.py
+│   │   └── apis/    # Individual API files
 │   ├── processing_generation/
 │   │   ├── generate.py    # Generate Word and Excel documents
 │   │   ├── newsletter.py     # Sends email report to user
-│   │   └── tools.py    # Define AI tool calls
 │   └── processing_tools/
-│       └── parser.py   # Extracts data from PDF, DOCS, CSV and XLSX files
+│   │   ├── parser.py   # Extracts data from PDF, DOCS, CSV and XLSX files
+│   └── prompts/     # AI prompts
 └── front_end/
     ├── eslint.config.js
     ├── index.html
@@ -285,10 +284,16 @@ LoCor_AI/
     ├── vite.config.js
     ├── api/
     │   ├── chat.js     # AI chat API
+    │   ├── dashboard.js     # System initialization and status
+    │   ├── documents.js     # System initialization and status
     │   ├── init.js     # System initialization and status
     │   └── insights.js    # Fetch business insights
     ├── public/
     ├── sample/   # Sample documents as input
+    │   └── balance.csv
+    │   └── company_description.txt
+    │   └── inventory.csv
+    │   └── sales.csv
     └── src/
         ├── App.css
         ├── App.jsx
@@ -296,9 +301,6 @@ LoCor_AI/
         ├── main.jsx
         ├── shared.css
         ├── assets/
-        │   ├── hero.png
-        │   ├── react.svg
-        │   └── vite.svg
         └── pages/
             ├── Chat.jsx      # Interactive AI business assistant interface
             ├── Dashboard.jsx    # Overview of business health and KPIs
