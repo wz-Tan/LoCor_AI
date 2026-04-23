@@ -4,8 +4,8 @@ import os
 import dotenv
 from db import query
 from processing_generation import generate, newsletter
-from zai import ZaiClient
 from prompts.newsletter import DOCUMENT_PROMPT, EXCEL_PROMPT
+from zai import ZaiClient
 
 dotenv.load_dotenv()
 
@@ -22,18 +22,6 @@ AI_ENDPOINT = "https://api.z.ai/api/paas/v4/"
 
 # Create Client Instance
 client = ZaiClient(api_key=API_KEY)
-
-# TODO: Instead of Using A Hardcoded List Pull from SQLite
-messages = [
-    {
-        "role": "system",
-        "content": "You are a professional market analyser with brilliant business decision making skills and persuasiveness on inventory management and sales prediction.",
-    },
-    {
-        "role": "user",
-        "content": "Imagine Christmas is Coming. Generate me a report and a corresponding spreadsheet on what I should buy more on, I am a Gift Store Owner. Once completed send me an email with the information",
-    },
-]
 
 
 async def main():
@@ -66,8 +54,6 @@ async def main():
 
     # currentTrends = await get_pricing_strategy()
 
-    
-
     document_messages = [
         {"role": "system", "content": DOCUMENT_PROMPT},
         {
@@ -92,7 +78,7 @@ async def main():
         ]  # remove first line (```markdown)
     if report_content.endswith("```"):
         report_content = report_content.rsplit("\n", 1)[0]  # remove last line (```)
-        
+
     print("Report content is ", report_content)
 
     # Create Excel Content

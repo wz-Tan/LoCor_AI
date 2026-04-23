@@ -1,5 +1,6 @@
 # Module to Send a Generated Report for the User
 import os
+from datetime import date
 
 import resend
 from dotenv import load_dotenv
@@ -14,6 +15,8 @@ email_address = os.getenv("EMAIL")
 
 # Send Email to User
 def send_email(reportBuffer: BytesIO, spreadsheetBuffer: BytesIO) -> None:
+
+    today = date.today()
     """Send Email to User with Attachments after Generating Word and Excel File"""
     reportBuffer.seek(0)
     spreadsheetBuffer.seek(0)
@@ -23,19 +26,19 @@ def send_email(reportBuffer: BytesIO, spreadsheetBuffer: BytesIO) -> None:
     # Convert Bytes into Attachment items
     report_attachment: resend.Attachment = {
         "content": list(report),
-        "filename": "report.docx",
+        "filename": f"Report_For_{today}.docx",
     }
 
     spreadsheet_attachment: resend.Attachment = {
         "content": list(spreadsheet),
-        "filename": "spreadsheet.xlsx",
+        "filename": f"Spreadsheet_For_{today}.docx",
     }
 
     # Email content
     params: resend.Emails.SendParams = {
         "from": "onboarding@resend.dev",
         "to": [email_address],
-        "subject": "Weekly Proposal and Business Report",
+        "subject": f"Weekly Proposal and Business Report on {today}",
         "html": "<strong>Attached are this week`s business report and the suggested inventory changes</strong>",
         "attachments": [report_attachment, spreadsheet_attachment],
     }

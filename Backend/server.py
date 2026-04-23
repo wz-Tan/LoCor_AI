@@ -5,11 +5,11 @@ from datetime import datetime
 
 import ai
 from chat_history import sql
-from pricing_strategy import get_pricing_strategy
 from db import data_feeder, query
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from pricing_strategy import get_pricing_strategy
 from processing_tools.parser import DocumentParser
 from pydantic import BaseModel
 
@@ -244,6 +244,39 @@ async def generate_dashboard():
 
     print("Generated dashboard are ", generated_dashboard)
     return {"generated_dashboard": generated_dashboard}
+
+
+@app.get("/generate_reports")
+async def generate_reports():
+    # For Querying Purposes
+    collection_names = [
+        "Company_Description",
+        "Inventory_Sheets",
+        "Balance_Sheets",
+        "Sales_Sheets",
+    ]
+    final_context = ""
+
+    queryText = "sales trends inventory performance"
+    print("Generating dashboard")
+
+    # Query ChromaDB for context (Separate for Description, Inventory, Sales and Balance Sheets)
+    for collection_name in collection_names:
+        results = query.QueryFunction(
+            query=[queryText], collection_name=collection_name
+        )
+
+        docs = (
+            results["documents"][0]
+            if isinstance(results, dict) and results["documents"]
+            else []
+        )
+        context = "\n\n".join(docs) if docs else ""
+
+        final_context += context
+
+    await ai.generate_newsletter(final_context)
+    return {"status": "ok"}
 
 
 if __name__ == "__main__":

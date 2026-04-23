@@ -412,7 +412,7 @@ export default function Chat() {
 
   // On mount: load chat history from backend and map into messages array
   useEffect(() => {
-    async function acquireChatHistory() {
+    async function chatHistory() {
       try {
         const data = await getChatHistory();
 
@@ -429,7 +429,7 @@ export default function Chat() {
         console.error("Failed to load chat history", err);
       }
     }
-    acquireChatHistory();
+    chatHistory();
   }, []);
 
   // Append a single message object to the messages array
