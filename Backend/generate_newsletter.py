@@ -64,7 +64,7 @@ async def main():
 
         final_context += context
 
-    # currentTrends = await fetch_and_summarise_trends()
+    # currentTrends = await get_pricing_strategy()
 
     
 

@@ -1,9 +1,8 @@
 import json
 import os
-
 from json_toon import json_to_toon
 from zai import ZaiClient  # type: ignore
-from test_data import USER_DATA, prompt_with_data
+from prompts.ai_pricing_strategy import USER_DATA, prompt_with_data
 
 
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))

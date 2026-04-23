@@ -5,12 +5,12 @@ if __name__ == '__main__':
 
 
 from dotenv import load_dotenv
-load_dotenv()  # Needed by imports
 
+load_dotenv()  # Needed by imports
 
 import asyncio
 from fetch_all_apis import fetch_all
-from ai_summarise import summarise_products
+from pricing_strategy.ai_pricing_strategy import summarise_products
 from apis import lazada_products
 from cache_manager import CacheManager
 
@@ -23,7 +23,7 @@ CACHE_KEY = 'cached_products'
 async def main(testing: bool = False) -> str:
     # Test
     if testing:
-        from test_data import COMPETITOR_DATA
+        from prompts.ai_pricing_strategy import COMPETITOR_DATA
         return summarise_products(COMPETITOR_DATA)
 
     # Cache if got

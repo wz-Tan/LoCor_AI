@@ -5,7 +5,7 @@ from datetime import datetime
 
 import ai
 from chat_history import sql
-from data_apis import fetch_and_summarise_trends
+from pricing_strategy import get_pricing_strategy
 from db import data_feeder, query
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile

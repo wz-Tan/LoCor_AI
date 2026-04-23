@@ -1,6 +1,6 @@
 from .base import fetch_api
 
-async def fetch_products(query: str) -> dict:
+async def lazada_products(query: str) -> dict:
     data = await fetch_api(
         host='lazada-api.p.rapidapi.com',
         endpoint='/lazada/search/items',
