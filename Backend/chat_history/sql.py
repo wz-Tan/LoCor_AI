@@ -1,9 +1,9 @@
-def init_db(cursor, conn):
+def init_db(conn):
     from prompts.chat_history import SYSTEM_PROMPT
 
     try:
-        cursor = conn.execute("SELECT COUNT(*) FROM messages")
-        count = cursor.fetchone()[0]
+        row = conn.execute("SELECT COUNT(*) FROM messages")
+        count = row.fetchone()[0]
         if count == 0:
             conn.execute(
                 "INSERT INTO messages (role, content) VALUES (?, ?)",

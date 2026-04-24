@@ -1,74 +1,69 @@
-import json
-
 # ========== YOUR COMPANY DATA ==========
 USER_DATA = {
-    "platform": "Lazada",
-    "products": [{
-        "product_name": "PowerCore 20K Pro",
-        "brand": "VoltEdge",
-        "description": "20000mAh power bank, dual USB-A, USB-C PD 20W, built-in Lightning and USB-C cables, LED display",
-        "cost_per_unit": 28.50,
-        "current_selling_price": 59.90,
-        "current_profit_margin_percent": 52.4,
-        "profit_per_unit": 31.40,
-        "monthly_sales_volume": 85,
-        "inventory_level": 210,
-        "inventory_holding_cost_per_unit": 0.85
-    }]
+    "product_name": "PowerCore 20K Pro",
+    "brand": "VoltEdge",
+    "description": "20000mAh power bank, dual USB-A, USB-C PD 20W, built-in Lightning and USB-C cables, LED display",
+    "cost_per_unit": 28.50,
+    "current_selling_price": 59.90,
+    "current_profit_margin_percent": 52.4,
+    "profit_per_unit": 31.40,
+    "monthly_sales_volume": 85,
+    "inventory_level": 210,
+    "inventory_holding_cost_per_unit": 0.85
 }
 
 # ========== COMPETITOR DATA (Lazada Format) ==========
-COMPETITOR_DATA = {
+MOCK_COMPETITOR_DATA = [{
     "platform": "Lazada",
-    "search_keyword": "20000mah power bank built in cable",
+    "search_keyword": "electric drill",
     "products": [
         {
-            "title": "20000mAh Power Bank With Built in Cable USB C Fast Charging LED Display Portable Charger",
-            "brand": "Remax",
-            "price": "49.90",
-            "ori_price": "89.90",
-            "discount": "44%",
-            "sold": "2.3k",
+            "title": "Bosch GSB 13 RE Professional Impact Drill 600W",
+            "brand": "Bosch",
+            "price": "219.00",
+            "ori_price": "269.00",
+            "discount": "19%",
+            "sold": "3.1k",
             "in_stock": True
         },
         {
-            "title": "Baseus Adaman 20000mAh Power Bank 22.5W Fast Charge Built-in Cable Digital Display",
-            "brand": "Baseus",
-            "price": "89.00",
-            "ori_price": "129.00",
-            "discount": "31%",
-            "sold": "892",
+            "title": "Makita HP1631 Impact Drill 710W Variable Speed",
+            "brand": "Makita",
+            "price": "175.00",
+            "ori_price": "210.00",
+            "discount": "17%",
+            "sold": "1.8k",
             "in_stock": True
         },
         {
-            "title": "Proda 20000mAh PD 20W Power Bank Built In Type C Cable Powerbank Fast Charging",
-            "brand": "Proda",
-            "price": "39.90",
-            "ori_price": "59.90",
-            "discount": "33%",
-            "sold": "5.1k",
-            "in_stock": True
-        },
-        {
-            "title": "VEGER 20000mAh Power Bank 22.5W Fast Charging Built-in Cable Digital Display External Battery",
-            "brand": "VEGER",
-            "price": "69.00",
+            "title": "DeWalt DWD024 Electric Drill 550W Keyless Chuck",
+            "brand": "DeWalt",
+            "price": "249.00",
             "ori_price": "",
             "discount": "",
-            "sold": "156",
+            "sold": "420",
             "in_stock": True
         },
         {
-            "title": "AUKEY 20000mAh Power Bank PD 20W + QC 3.0 with Built-in Lightning Cable for iPhone",
-            "brand": "AUKEY",
-            "price": "79.90",
-            "ori_price": "99.90",
+            "title": "Ingco ID5508 Impact Drill 550W 13mm Variable Speed",
+            "brand": "Ingco",
+            "price": "89.00",
+            "ori_price": "120.00",
+            "discount": "26%",
+            "sold": "6.2k",
+            "in_stock": True
+        },
+        {
+            "title": "Stanley SBH600 Hammer Drill 600W with Carry Case",
+            "brand": "Stanley",
+            "price": "159.00",
+            "ori_price": "199.00",
             "discount": "20%",
-            "sold": "1.2k",
+            "sold": "980",
             "in_stock": False
         }
     ]
-}
+}]
 
 # ========== PROMPT ==========
 def prompt_with_data(user_data, competitor_data) -> str:
@@ -76,10 +71,10 @@ def prompt_with_data(user_data, competitor_data) -> str:
 You are an AI pricing strategist for a Malaysian e-commerce business selling on Lazada.
 
 === YOUR PRODUCT (Current Position) ===
-{json.dumps(user_data, indent=2)}
+{user_data}
 
 === COMPETITOR DATA FROM LAZADA ===
-{json.dumps(competitor_data, indent=2)}
+{competitor_data}
 
 === YOUR TASK ===
 Analyze the competitive landscape and provide ONE specific pricing recommendation.

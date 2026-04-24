@@ -4,6 +4,7 @@ import Dashboard from "./pages/Dashboard";
 import Insights from "./pages/Insights";
 import Chat from "./pages/Chat";
 import Pricing  from "./pages/Pricing";
+import PricingDetail from "./pages/PricingDetail";
 
 export default function App() {
   return (
@@ -14,6 +15,7 @@ export default function App() {
         <Route path="/insights" element={<Insights />} />
         <Route path="/chat" element={<Chat />} />
         <Route path="/pricing" element={<Pricing />} />
+        <Route path="/pricing/:productName" element={<PricingDetail />} />
       </Routes>
     </BrowserRouter>
   );
