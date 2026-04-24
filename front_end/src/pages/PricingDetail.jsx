@@ -50,7 +50,7 @@ const styles = `
 
   /* Product header strip */
   .product-strip {
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex; align-items: center; justify-content: center;
     background: rgba(255,255,255,0.03);
     border: 1px solid rgba(255,255,255,0.07);
     border-radius: 14px;

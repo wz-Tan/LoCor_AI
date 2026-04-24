@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { getChatHistory, getAIResponse } from "../../api/chat";
+import { getChatHistory, getAIResponseStream, clearChat } from "../../api/chat";
 
 const styles = `
   @import url('https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500&display=swap');
@@ -187,7 +187,7 @@ const styles = `
   .history-item-date { font-size: 0.68rem; color: rgba(240,237,232,0.2); }
 
   .chat-main {
-    margin-left: 460px;
+    margin-left: 200px;
     flex: 1;
     display: flex;
     flex-direction: column;
@@ -196,10 +196,10 @@ const styles = `
     transition: margin-left 0.3s ease;
     overflow: hidden;
     min-width: 0;
-    max-width: calc(100vw - 460px);
+    max-width: calc(100vw - 10px);
   }
 
-  .chat-main.collapsed { margin-left: 240px; }
+  .chat-main.collapsed { margin-left: 120px; }
 
   .chat-header {
     padding: 1.5rem 2rem;
@@ -363,6 +363,9 @@ const styles = `
     color: rgba(20,200,160,0.9);
   }
 
+  .clear-btn { background: rgba(255,100,100,0.08); border: 1px solid rgba(255,100,100,0.2); color: rgba(255,100,100,0.7); border-radius: 8px; padding: 5px 14px; font-size: 0.75rem; cursor: pointer; font-family: 'DM Sans', sans-serif; transition: all 0.2s ease; }
+.clear-btn:hover { background: rgba(255,100,100,0.15); color: rgba(255,100,100,0.95); }
+
   .file-remove { background: none; border: none; color: rgba(20,200,160,0.6); cursor: pointer; margin-left: auto; font-size: 0.8rem; }
 
   @keyframes fadeUp {
@@ -391,6 +394,11 @@ function getDateLabel() {
     month: "short",
     day: "numeric",
   });
+}
+
+async function handleClear() {
+    await clearChat();
+    setMessages([]);
 }
 
 export default function Chat() {
@@ -441,34 +449,35 @@ export default function Chat() {
     const text = input.trim();
     if (!text && !attachedFile) return;
 
-    const userMsg = {
-      role: "user",
-      text: attachedFile
-        ? `${text ? text + " " : ""}[Attached: ${attachedFile.name}]`
-        : text,
-      time: getTime(),
-    };
-
+    appendMessage({ role: "user", text, time: getTime() });
     setInput("");
     setAttachedFile(null);
-    appendMessage(userMsg); // show user message immediately
     setIsTyping(true);
 
+    // placeholder for streaming message
+    const aiMsgIndex = messages.length + 1;
+    setMessages(prev => [...prev, { role: "ai", text: "", time: getTime() }]);
+    setIsTyping(false);
+
     try {
-      const reply = await getAIResponse(text); // POST to backend, returns ai response string
-      console.log("AI Response is ", reply);
-      appendMessage({ role: "ai", text: reply, time: getTime() });
+        await getAIResponseStream(text, (chunk) => {
+            setMessages(prev => {
+                const updated = [...prev];
+                updated[updated.length - 1] = {
+                    ...updated[updated.length - 1],
+                    text: updated[updated.length - 1].text + chunk,
+                };
+                return updated;
+            });
+        });
     } catch (err) {
-      console.error("Failed to get AI response", err);
-      appendMessage({
-        role: "ai",
-        text: "Something went wrong. Please try again.",
-        time: getTime(),
-      });
-    } finally {
-      setIsTyping(false);
+        setMessages(prev => {
+            const updated = [...prev];
+            updated[updated.length - 1].text = "Something went wrong. Please try again.";
+            return updated;
+        });
     }
-  }
+}
 
   function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -531,6 +540,7 @@ export default function Chat() {
               </div>
             </div>
             <span className="model-badge">LoCorAI · GLM</span>
+            <button className="clear-btn" onClick={handleClear}>Clear chat</button>
           </div>
 
           <div className="messages-wrap">
