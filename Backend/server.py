@@ -1,27 +1,26 @@
+import json
+import os
 import uuid
 from contextlib import asynccontextmanager
 from datetime import datetime
-import os
-from json_toon import json_to_toon
-import json
 
-from zai import ZaiClient
 from ai_generation.ai_chat import AIChat
 from ai_generation.ai_report import AIReportGenerator
+from apis import fetch_all, lazada_prices
+from cache_manager import CacheManager
 from chat_history import sql
 from chat_history.database import conn, cursor
-from vector_db.retriever import VectorRetriever
-from vector_db.vector_store import VectorStore
 from fastapi import FastAPI
 from fastapi.datastructures import UploadFile
 from fastapi.middleware.cors import CORSMiddleware
-from processing_tools.parser import DocumentParser
-from pydantic import BaseModel
-from apis import fetch_all, lazada_prices
-from cache_manager import CacheManager
 from fastapi.responses import StreamingResponse
+from json_toon import json_to_toon
+from processing_tools.parser import DocumentParser
 from prompts.ai_pricing_strategy import prompt_with_data
-
+from pydantic import BaseModel
+from vector_db.retriever import VectorRetriever
+from vector_db.vector_store import VectorStore
+from zai import ZaiClient
 
 client = ZaiClient(api_key=os.getenv("Z_AI_API_KEY"))
 ai_chat = AIChat(client)
@@ -36,7 +35,12 @@ class ProductDetails(BaseModel):
     product_name: str
 
 
-COLLECTION_NAMES = ["Company_Description", "Inventory_Sheets", "Balance_Sheets", "Sales_Sheets"]
+COLLECTION_NAMES = [
+    "Company_Description",
+    "Inventory_Sheets",
+    "Balance_Sheets",
+    "Sales_Sheets",
+]
 PRICING_APIS = [lazada_prices]
 USE_MOCK_PRICING = False
 
@@ -61,7 +65,11 @@ def _build_context(query_text: str) -> str:
     context_parts = []
     for name in COLLECTION_NAMES:
         results = VectorRetriever(name).query([query_text])
-        docs = results["documents"][0] if isinstance(results, dict) and results["documents"] else []
+        docs = (
+            results["documents"][0]
+            if isinstance(results, dict) and results["documents"]
+            else []
+        )
         if docs:
             context_parts.append("\n\n".join(docs))
     return "".join(context_parts)
@@ -83,10 +91,13 @@ async def initialise_data(
 ):
 
     # Parse Files into Word and Dataframes
-    company_description, inventory_df, sales_df, balance_sheet_df, = (
-        await DocumentParser.initialise_data(
-            description_file, inventory_sheet, sales_sheet, balance_sheet
-        )
+    (
+        company_description,
+        inventory_df,
+        sales_df,
+        balance_sheet_df,
+    ) = await DocumentParser.initialise_data(
+        description_file, inventory_sheet, sales_sheet, balance_sheet
     )
 
     # Use Current Time as metadata
@@ -95,9 +106,9 @@ async def initialise_data(
     # Store data into ChromaDB
     entries = [
         ("Company_Description", company_description),
-        ("Inventory_Sheets",    DocumentParser._parse_dataframe(inventory_df)),
-        ("Sales_Sheets",        DocumentParser._parse_dataframe(sales_df)),
-        ("Balance_Sheets",      DocumentParser._parse_dataframe(balance_sheet_df)),
+        ("Inventory_Sheets", DocumentParser._parse_dataframe(inventory_df)),
+        ("Sales_Sheets", DocumentParser._parse_dataframe(sales_df)),
+        ("Balance_Sheets", DocumentParser._parse_dataframe(balance_sheet_df)),
     ]
     for collection_name, document in entries:
         VectorStore(collection_name).add(
@@ -139,10 +150,17 @@ async def stream_ai_response(body: UserMessage):
         if chat_history and chat_history[0]["role"] == "system":
             chat_history[0] = {
                 "role": "system",
-                "content": chat_history[0]["content"] + f"\n\nRelevant business data:\n\n{final_context}",
+                "content": chat_history[0]["content"]
+                + f"\n\nRelevant business data:\n\n{final_context}",
             }
         else:
-            chat_history.insert(0, {"role": "system", "content": f"Relevant business data:\n\n{final_context}"})
+            chat_history.insert(
+                0,
+                {
+                    "role": "system",
+                    "content": f"Relevant business data:\n\n{final_context}",
+                },
+            )
 
     sql.save_message(cursor, conn, "user", body.user_response)
 
@@ -157,7 +175,7 @@ async def stream_ai_response(body: UserMessage):
                 max_tokens=2048,
                 temperature=0.5,
                 stream=True,
-            )
+            ),
         )
         result = ""
         for chunk in response:
@@ -206,21 +224,25 @@ def _parse_pandas_repr(text: str) -> list[dict]:
     header_line = lines[0]
     # Split header into tokens and record their start positions
     import re
-    header_tokens = [(m.group(), m.start()) for m in re.finditer(r'\S+(?:\s\S+)*?(?=\s{2,}|$)', header_line)]
+
+    header_tokens = [
+        (m.group(), m.start())
+        for m in re.finditer(r"\S+(?:\s\S+)*?(?=\s{2,}|$)", header_line)
+    ]
     # Simpler: just split on 2+ spaces
-    col_names = re.split(r'\s{2,}', header_line.strip())
+    col_names = re.split(r"\s{2,}", header_line.strip())
 
     rows = []
     for line in lines[1:]:
         # Strip the leading row index (digits at the start)
-        stripped = re.sub(r'^\s*\d+\s+', '', line)
-        values = re.split(r'\s{2,}', stripped.strip())
+        stripped = re.sub(r"^\s*\d+\s+", "", line)
+        values = re.split(r"\s{2,}", stripped.strip())
         if len(values) == len(col_names):
             rows.append(dict(zip(col_names, [v.strip() for v in values])))
         elif len(values) > len(col_names):
             # More values than columns — merge overflow into first column
             overflow = len(values) - len(col_names)
-            merged = [" ".join(values[:overflow+1])] + values[overflow+1:]
+            merged = [" ".join(values[: overflow + 1])] + values[overflow + 1 :]
             if len(merged) == len(col_names):
                 rows.append(dict(zip(col_names, [v.strip() for v in merged])))
     return rows
@@ -239,7 +261,11 @@ def _query_repr(collection: str, query: str) -> list[dict]:
     """Query a VectorRetriever collection and parse the pandas repr result."""
     try:
         results = VectorRetriever(collection).query([query])
-        docs = results["documents"][0] if isinstance(results, dict) and results["documents"] else []
+        docs = (
+            results["documents"][0]
+            if isinstance(results, dict) and results["documents"]
+            else []
+        )
         if docs:
             return _parse_pandas_repr(docs[0])
     except Exception as e:
@@ -253,8 +279,8 @@ async def get_products():
     Reads inventory + sales data from ChromaDB and returns a structured
     JSON list of products with computed profit margin and monthly sales.
     """
-    inv_rows   = _query_repr("Inventory_Sheets", "product inventory stock price")
-    sales_rows = _query_repr("Sales_Sheets",     "product sales revenue units sold")
+    inv_rows = _query_repr("Inventory_Sheets", "product inventory stock price")
+    sales_rows = _query_repr("Sales_Sheets", "product sales revenue units sold")
 
     print("INV ROWS:", inv_rows[:2])
     print("SALES ROWS:", sales_rows[:2])
@@ -275,25 +301,31 @@ async def get_products():
             sales_by_product[name] = sales_by_product.get(name, 0) + units
 
     def safe_float(val, default=0.0):
-        try: return float(str(val).replace(",", "").replace("RM", "").strip())
-        except: return default
+        try:
+            return float(str(val).replace(",", "").replace("RM", "").strip())
+        except:
+            return default
 
     def safe_int(val, default=0):
-        try: return int(float(str(val).replace(",", "").strip()))
-        except: return default
+        try:
+            return int(float(str(val).replace(",", "").strip()))
+        except:
+            return default
 
     products = []
     for row in inv_rows:
-        name       = _col(row, "product", "product name", "name") or "Unknown"
-        category   = _col(row, "category", "cat") or "—"
+        name = _col(row, "product", "product name", "name") or "Unknown"
+        category = _col(row, "category", "cat") or "—"
         unit_price = safe_float(_col(row, "unit price (rm)", "unit price", "price"))
         cost_price = safe_float(_col(row, "cost price (rm)", "cost price", "cost"))
-        stock      = safe_int(_col(row,   "stock", "quantity", "qty"))
-        reorder    = safe_int(_col(row,   "reorder level", "reorder"))
+        stock = safe_int(_col(row, "stock", "quantity", "qty"))
+        reorder = safe_int(_col(row, "reorder level", "reorder"))
 
         profit_per_unit = round(unit_price - cost_price, 2)
-        margin_pct      = round((profit_per_unit / unit_price) * 100, 1) if unit_price > 0 else 0.0
-        stock_status    = "low" if 0 < reorder >= stock else "ok"
+        margin_pct = (
+            round((profit_per_unit / unit_price) * 100, 1) if unit_price > 0 else 0.0
+        )
+        stock_status = "low" if 0 < reorder >= stock else "ok"
 
         # Match sales by product name (fuzzy: check if stored name contains our name or vice versa)
         monthly_sales = 0
@@ -302,18 +334,20 @@ async def get_products():
                 monthly_sales = total
                 break
 
-        products.append({
-            "name":             name,
-            "category":         category,
-            "stock":            stock,
-            "unit_price":       unit_price,
-            "cost_price":       cost_price,
-            "reorder_level":    reorder,
-            "profit_per_unit":  profit_per_unit,
-            "margin_pct":       margin_pct,
-            "stock_status":     stock_status,
-            "monthly_sales":    monthly_sales,
-        })
+        products.append(
+            {
+                "name": name,
+                "category": category,
+                "stock": stock,
+                "unit_price": unit_price,
+                "cost_price": cost_price,
+                "reorder_level": reorder,
+                "profit_per_unit": profit_per_unit,
+                "margin_pct": margin_pct,
+                "stock_status": stock_status,
+                "monthly_sales": monthly_sales,
+            }
+        )
 
     return {"products": products}
 
@@ -327,9 +361,13 @@ def _build_user_data(product_name: str) -> dict:
     inventory_row = {}
     try:
         inv_results = VectorRetriever("Inventory_Sheets").query([product_name])
-        inv_docs = inv_results["documents"][0] if isinstance(inv_results, dict) and inv_results["documents"] else []
+        inv_docs = (
+            inv_results["documents"][0]
+            if isinstance(inv_results, dict) and inv_results["documents"]
+            else []
+        )
         if inv_docs:
-            rows = _parse_pandas_repr(inv_docs[0])   # ← was _parse_csv_rows
+            rows = _parse_pandas_repr(inv_docs[0])  # ← was _parse_csv_rows
             for row in rows:
                 name_val = _col(row, "product", "product name", "name")
                 if product_name.lower() in name_val.lower():
@@ -344,9 +382,13 @@ def _build_user_data(product_name: str) -> dict:
     sales_row = {}
     try:
         sales_results = VectorRetriever("Sales_Sheets").query([product_name])
-        sales_docs = sales_results["documents"][0] if isinstance(sales_results, dict) and sales_results["documents"] else []
+        sales_docs = (
+            sales_results["documents"][0]
+            if isinstance(sales_results, dict) and sales_results["documents"]
+            else []
+        )
         if sales_docs:
-            rows = _parse_pandas_repr(sales_docs[0])   # ← was _parse_csv_rows
+            rows = _parse_pandas_repr(sales_docs[0])  # ← was _parse_csv_rows
             for row in rows:
                 name_val = _col(row, "product", "product name", "name")
                 if product_name.lower() in name_val.lower():
@@ -359,33 +401,49 @@ def _build_user_data(product_name: str) -> dict:
 
     # ── Build dict ─────────────────────────────────────────────────────────────
     def safe_float(val, default=0.0):
-        try: return float(str(val).replace(",", "").replace("RM", "").strip())
-        except: return default
+        try:
+            return float(str(val).replace(",", "").replace("RM", "").strip())
+        except:
+            return default
 
     def safe_int(val, default=0):
-        try: return int(float(str(val).replace(",", "").strip()))
-        except: return default
+        try:
+            return int(float(str(val).replace(",", "").strip()))
+        except:
+            return default
 
-    unit_price  = safe_float(_col(inventory_row, "unit price (rm)", "unit price", "selling price", "price"))
-    cost_price  = safe_float(_col(inventory_row, "cost price (rm)", "cost price", "cost"))
-    stock       = safe_int(_col(inventory_row,   "stock", "quantity", "qty"))
-    category    = _col(inventory_row, "category", "cat") or "—"
+    unit_price = safe_float(
+        _col(inventory_row, "unit price (rm)", "unit price", "selling price", "price")
+    )
+    cost_price = safe_float(
+        _col(inventory_row, "cost price (rm)", "cost price", "cost")
+    )
+    stock = safe_int(_col(inventory_row, "stock", "quantity", "qty"))
+    category = _col(inventory_row, "category", "cat") or "—"
 
-    monthly_vol  = safe_int(_col(sales_row, "monthly sales", "monthly volume", "units sold", "quantity sold"))
-    holding_cost = safe_float(_col(inventory_row, "holding cost", "inventory holding cost"))
+    monthly_vol = safe_int(
+        _col(
+            sales_row, "monthly sales", "monthly volume", "units sold", "quantity sold"
+        )
+    )
+    holding_cost = safe_float(
+        _col(inventory_row, "holding cost", "inventory holding cost")
+    )
 
     profit_per_unit = round(unit_price - cost_price, 2)
-    margin_pct      = round((profit_per_unit / unit_price) * 100, 1) if unit_price > 0 else 0.0
+    margin_pct = (
+        round((profit_per_unit / unit_price) * 100, 1) if unit_price > 0 else 0.0
+    )
 
     return {
-        "product_name":                    product_name,
-        "category":                        category,
-        "cost_per_unit":                   cost_price,
-        "current_selling_price":           unit_price,
-        "current_profit_margin_percent":   margin_pct,
-        "profit_per_unit":                 profit_per_unit,
-        "inventory_level":                 stock,
-        "monthly_sales_volume":            monthly_vol or None,
+        "product_name": product_name,
+        "category": category,
+        "cost_per_unit": cost_price,
+        "current_selling_price": unit_price,
+        "current_profit_margin_percent": margin_pct,
+        "profit_per_unit": profit_per_unit,
+        "inventory_level": stock,
+        "monthly_sales_volume": monthly_vol or None,
         "inventory_holding_cost_per_unit": holding_cost or None,
     }
 
@@ -413,16 +471,18 @@ def convert_to_toon(data: list[dict]) -> str:
     return toon_text
 
 
-@app.post('/pricing-strategy/stream')
+@app.post("/pricing-strategy/stream")
 async def stream_pricing_strategy(product_details: ProductDetails):
     product_name = product_details.product_name
 
     # Serve cache if present
     cached = CacheManager.serve_cache(product_name)
     if cached:
-        print('Serving from cache...')
+        print("Serving from cache...")
+
         async def cached_stream():
             yield cached
+
         return StreamingResponse(cached_stream(), media_type="text/plain")
 
     # Build user data dynamically from VectorRetriever
@@ -431,17 +491,21 @@ async def stream_pricing_strategy(product_details: ProductDetails):
     # Use mock data or real API depending on flag
     if USE_MOCK_PRICING:
         from prompts.ai_pricing_strategy import MOCK_COMPETITOR_DATA
+
         competitor_data = MOCK_COMPETITOR_DATA
     else:
         competitor_data = await fetch_all(PRICING_APIS, query=product_name)
         if not competitor_data:
+
             async def error_stream():
                 yield "All pricing APIs failed to respond."
+
             return StreamingResponse(error_stream(), media_type="text/plain")
 
     # AI synthesis
     async def live_stream():
         import asyncio
+
         result = ""
         loop = asyncio.get_event_loop()
 
@@ -449,18 +513,19 @@ async def stream_pricing_strategy(product_details: ProductDetails):
             None,
             lambda: ai_chat.client.chat.completions.create(
                 model="glm-4.5-flash",
-                messages=[{
-                    "role": "user",
-                    "content": prompt_with_data(
-                        json_to_toon(user_data),
-                        json_to_toon(competitor_data)
-                    )
-                }],
+                messages=[
+                    {
+                        "role": "user",
+                        "content": prompt_with_data(
+                            json_to_toon(user_data), json_to_toon(competitor_data)
+                        ),
+                    }
+                ],
                 thinking={"type": "disabled"},
                 max_tokens=2000,
                 temperature=0.5,
                 stream=True,
-            )
+            ),
         )
 
         # Stream
@@ -468,9 +533,18 @@ async def stream_pricing_strategy(product_details: ProductDetails):
             delta = chunk.choices[0].delta.content or ""
             if delta:
                 result += delta
-                print(delta, end='')
+                print(delta, end="")
                 yield delta
                 await asyncio.sleep(0)
         CacheManager.store_cache(product_name, result)
 
     return StreamingResponse(live_stream(), media_type="text/plain")
+
+
+@app.get("/chat_response/clear")
+async def clear_chat_response():
+    print("Clear chat response")
+    sql.clear_messages(cursor, conn)
+    sql.init_db(conn)
+    chat_history = sql.get_all_messages(cursor)
+    return {"chat_history": chat_history}

@@ -396,11 +396,6 @@ function getDateLabel() {
   });
 }
 
-async function handleClear() {
-    await clearChat();
-    setMessages([]);
-}
-
 export default function Chat() {
   const navigate = useNavigate();
   const [sidebarOpen, setSidebarOpen] = useState(true);
@@ -417,6 +412,19 @@ export default function Chat() {
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
+
+  async function handleClear() {
+    const data = await clearChat();
+    // role from backend is "user" or "assistant" -> map "assistant" to "ai"
+    const mapped = (data ?? [])
+      .filter((msg) => msg.role === "user" || msg.role === "assistant")
+      .map((msg) => ({
+        role: msg.role === "assistant" ? "ai" : "user",
+        text: msg.content,
+        time: getTime(),
+      }));
+    setMessages(mapped);
+  }
 
   // On mount: load chat history from backend and map into messages array
   useEffect(() => {
@@ -456,28 +464,29 @@ export default function Chat() {
 
     // placeholder for streaming message
     const aiMsgIndex = messages.length + 1;
-    setMessages(prev => [...prev, { role: "ai", text: "", time: getTime() }]);
+    setMessages((prev) => [...prev, { role: "ai", text: "", time: getTime() }]);
     setIsTyping(false);
 
     try {
-        await getAIResponseStream(text, (chunk) => {
-            setMessages(prev => {
-                const updated = [...prev];
-                updated[updated.length - 1] = {
-                    ...updated[updated.length - 1],
-                    text: updated[updated.length - 1].text + chunk,
-                };
-                return updated;
-            });
+      await getAIResponseStream(text, (chunk) => {
+        setMessages((prev) => {
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            text: updated[updated.length - 1].text + chunk,
+          };
+          return updated;
         });
+      });
     } catch (err) {
-        setMessages(prev => {
-            const updated = [...prev];
-            updated[updated.length - 1].text = "Something went wrong. Please try again.";
-            return updated;
-        });
+      setMessages((prev) => {
+        const updated = [...prev];
+        updated[updated.length - 1].text =
+          "Something went wrong. Please try again.";
+        return updated;
+      });
     }
-}
+  }
 
   function handleKeyDown(e) {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -540,7 +549,9 @@ export default function Chat() {
               </div>
             </div>
             <span className="model-badge">LoCorAI · GLM</span>
-            <button className="clear-btn" onClick={handleClear}>Clear chat</button>
+            <button className="clear-btn" onClick={handleClear}>
+              Clear chat
+            </button>
           </div>
 
           <div className="messages-wrap">
