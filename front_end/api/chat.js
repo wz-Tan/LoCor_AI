@@ -23,16 +23,31 @@ export async function retrieveChatHistoryFromBackend() {
   return data.chat_history;
 }
 
-export async function getAIResponse(user_message) {
-  console.log("Getting AI Response to User's Message", user_message);
-  currentChat.push({ role: "user", content: user_message });
-  const res = await fetch(`http://localhost:${ENDPOINT}/chat_response`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ user_response: user_message }),
-  });
-  const data = await res.json();
-  currentChat.push(data);
-  console.log("AI Response is ", data.ai_response);
-  return data.ai_response;
+export async function getAIResponseStream(user_message, onChunk) {
+    currentChat.push({ role: "user", content: user_message });
+    const res = await fetch(`http://localhost:${ENDPOINT}/chat_response/stream`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ user_response: user_message }),
+    });
+    const reader = res.body.getReader();
+    const decoder = new TextDecoder();
+    let full = "";
+    while (true) {
+        const { value, done } = await reader.read();
+        if (done) break;
+        const chunk = decoder.decode(value, { stream: true });
+        full += chunk;
+        onChunk(chunk);
+    }
+    currentChat.push({ role: "assistant", content: full });
+    return full;
+}
+
+export async function clearChat() {
+    console.log('cleared chat');
+    // await fetch(
+    //   `http://localhost:${ENDPOINT}/clear_chat`,
+    //   { method: "POST" }
+    // );
 }

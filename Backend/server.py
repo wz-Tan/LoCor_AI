@@ -38,7 +38,7 @@ class ProductDetails(BaseModel):
 
 COLLECTION_NAMES = ["Company_Description", "Inventory_Sheets", "Balance_Sheets", "Sales_Sheets"]
 PRICING_APIS = [lazada_prices]
-USE_MOCK_PRICING = True
+USE_MOCK_PRICING = False
 
 
 @asynccontextmanager
@@ -118,23 +118,57 @@ def get_chat_history():
     return {"chat_history": chat_history}
 
 
-# User Sends Message -> AI Responds, and The Interaction Gets Saved
-@app.post("/chat_response")
-async def get_ai_response(body: UserMessage):
-    if body.user_response == "refresh":
-        sql.clear_messages(cursor, conn)
-        sql.init_db(conn)
-        return {"ai_response": "Chat history cleared."}
+@app.post("/clear_chat")
+async def clear_chat():
+    sql.clear_messages(cursor, conn)
+    sql.init_db(conn)
+    return {"status": "cleared"}
 
+
+# User Sends Message -> AI Responds, and The Interaction Gets Saved
+@app.post("/chat_response/stream")
+async def stream_ai_response(body: UserMessage):
+    import asyncio
+
+    # Fetch chat history
     chat_history = sql.get_all_messages(cursor)
     chat_history.append({"role": "user", "content": body.user_response})
-
     final_context = _build_context(body.user_response)
-    ai_response = await ai_chat.respond(chat_history, final_context)
+
+    if final_context:
+        if chat_history and chat_history[0]["role"] == "system":
+            chat_history[0] = {
+                "role": "system",
+                "content": chat_history[0]["content"] + f"\n\nRelevant business data:\n\n{final_context}",
+            }
+        else:
+            chat_history.insert(0, {"role": "system", "content": f"Relevant business data:\n\n{final_context}"})
 
     sql.save_message(cursor, conn, "user", body.user_response)
-    sql.save_message(cursor, conn, "assistant", ai_response)
-    return {"ai_response": ai_response}
+
+    async def live_stream():
+        loop = asyncio.get_event_loop()
+        response = await loop.run_in_executor(
+            None,
+            lambda: ai_chat.client.chat.completions.create(
+                model="glm-4.5-flash",
+                messages=chat_history,  # ai_chat.respond logic inlined here
+                thinking={"type": "disabled"},
+                max_tokens=2048,
+                temperature=0.5,
+                stream=True,
+            )
+        )
+        result = ""
+        for chunk in response:
+            delta = chunk.choices[0].delta.content or ""
+            if delta:
+                result += delta
+                yield delta
+                await asyncio.sleep(0)
+        sql.save_message(cursor, conn, "assistant", result)
+
+    return StreamingResponse(live_stream(), media_type="text/plain")
 
 
 @app.get("/generate_insights")
@@ -284,22 +318,6 @@ async def get_products():
     return {"products": products}
 
 
-# ── Add this helper function to server.py (alongside _build_context) ──────────
-
-def _parse_csv_rows(raw_text: str) -> list[dict]:
-    """Parse a CSV-formatted string (as stored by DocumentParser) into a list of dicts."""
-    lines = [l.strip() for l in raw_text.strip().splitlines() if l.strip()]
-    if len(lines) < 2:
-        return []
-    header = [c.strip() for c in lines[0].split(",")]
-    rows = []
-    for line in lines[1:]:
-        values = [v.strip() for v in line.split(",")]
-        if len(values) >= len(header):
-            rows.append(dict(zip(header, values)))
-    return rows
-
-
 def _build_user_data(product_name: str) -> dict:
     """
     Query VectorRetriever for inventory + sales data and return a structured
@@ -397,24 +415,25 @@ def convert_to_toon(data: list[dict]) -> str:
 
 @app.post('/pricing-strategy/stream')
 async def stream_pricing_strategy(product_details: ProductDetails):
-    cache_key = f"pricing:{product_details.product_name}"
+    product_name = product_details.product_name
 
     # Serve cache if present
-    cached = CacheManager.serve_cache(cache_key)
+    cached = CacheManager.serve_cache(product_name)
     if cached:
+        print('Serving from cache...')
         async def cached_stream():
             yield cached
         return StreamingResponse(cached_stream(), media_type="text/plain")
 
     # Build user data dynamically from VectorRetriever
-    user_data = _build_user_data(product_details.product_name)
+    user_data = _build_user_data(product_name)
 
     # Use mock data or real API depending on flag
     if USE_MOCK_PRICING:
         from prompts.ai_pricing_strategy import MOCK_COMPETITOR_DATA
         competitor_data = MOCK_COMPETITOR_DATA
     else:
-        competitor_data = await fetch_all(PRICING_APIS, query=product_details.product_name)
+        competitor_data = await fetch_all(PRICING_APIS, query=product_name)
         if not competitor_data:
             async def error_stream():
                 yield "All pricing APIs failed to respond."
@@ -422,27 +441,36 @@ async def stream_pricing_strategy(product_details: ProductDetails):
 
     # AI synthesis
     async def live_stream():
-        print("user_data:", user_data)
+        import asyncio
         result = ""
-        response = ai_chat.client.chat.completions.create(
-            model="glm-4.5-flash",
-            messages=[{
-                "role": "user",
-                "content": prompt_with_data(
-                    convert_to_toon(user_data),
-                    convert_to_toon(competitor_data)
-                )
-            }],
-            thinking={"type": "disabled"},
-            max_tokens=2000,
-            temperature=0.5,
-            stream=True,
+        loop = asyncio.get_event_loop()
+
+        response = await loop.run_in_executor(
+            None,
+            lambda: ai_chat.client.chat.completions.create(
+                model="glm-4.5-flash",
+                messages=[{
+                    "role": "user",
+                    "content": prompt_with_data(
+                        json_to_toon(user_data),
+                        json_to_toon(competitor_data)
+                    )
+                }],
+                thinking={"type": "disabled"},
+                max_tokens=2000,
+                temperature=0.5,
+                stream=True,
+            )
         )
+
+        # Stream
         for chunk in response:
             delta = chunk.choices[0].delta.content or ""
-            result += delta
-            print(delta, end='')
-            yield delta
-        CacheManager.store_cache(cache_key, result)
+            if delta:
+                result += delta
+                print(delta, end='')
+                yield delta
+                await asyncio.sleep(0)
+        CacheManager.store_cache(product_name, result)
 
     return StreamingResponse(live_stream(), media_type="text/plain")
