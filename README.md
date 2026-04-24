@@ -6,6 +6,8 @@
 
 ## 🌟 Key Features
 
+![Key Features](features.png)
+
 ### 1. Unified Data Ingestion
 
 - **Multi-Format Support**: Effortlessly upload and parse PDF/DOCX company descriptions and CSV/XLSX spreadsheets for Inventory, Sales, and Balance Sheets.
@@ -257,25 +259,32 @@ LoCor_AI/
 ├── requirements.txt
 ├── Backend/
 │   ├── .env.example    # Example environment config
-│   ├── ai.py     # AI logic for chat and automated business insights using Z.ai
-│   ├── main.py   # Test script for end-to-end AI automation loop
+│   ├── cache_manager.py # Redis cache manager
 │   ├── server.py    # FastAPI backend server
+│   ├── ai_generation/
+│   │   ├── ai_chat.py    # AI logic for chat
+│   │   └── ai_report.py   # AI logic for automated business reports
+│   ├── apis/
+│   │   ├── API_NOTES.md   # Notes on API integrations
+│   │   ├── base.py    # Base API utility functions
+│   │   ├── fetch_all_apis.py    # Orchestrates fetching from various APIs
+│   │   └── lazada_api.py    # Lazada-specific API integration
 │   ├── chat_history/
-│   │   └── sql.py   # Storage for chat messages
-│   ├── db/
-│   │   ├── data_feeder.py    # Store business data into ChromaDB
-│   │   └── query.py    # Vector search queries for RAG
-│   ├── pricing_strategy/
-│   │   ├── ai_pricing_strategy.py   # AI logic for summarizing APIs
-│   │   ├── fetch_all_apis.py    # Orchestrate fetching of APIs
-│   │   ├── main.py
-│   │   └── apis/    # Individual API files
+│   │   ├── database.py    # Database connection and setup
+│   │   └── sql.py   # SQL queries for chat message storage
 │   ├── processing_generation/
-│   │   ├── generate.py    # Generate Word and Excel documents
-│   │   ├── newsletter.py     # Sends email report to user
-│   └── processing_tools/
-│   │   ├── parser.py   # Extracts data from PDF, DOCS, CSV and XLSX files
-│   └── prompts/     # AI prompts
+│   │   ├── generate.py    # Generates Word and Excel documents
+│   │   └── newsletter.py     # Sends email reports to users
+│   ├── processing_tools/
+│   │   └── parser.py   # Extracts data from PDF, DOCX, CSV, and XLSX files
+│   └── prompts/     # AI prompt definitions
+│       ├── ai_generation.py
+│       ├── ai_pricing_strategy.py
+│       ├── chat_history.py
+│       └── newsletter.py
+│   └── vector_db/
+│       ├── retriever.py    # Vector search queries for RAG
+│       └── vector_store.py    # Stores business data into ChromaDB
 └── front_end/
     ├── eslint.config.js
     ├── index.html
@@ -284,15 +293,18 @@ LoCor_AI/
     ├── vite.config.js
     ├── api/
     │   ├── chat.js     # AI chat API
-    │   ├── dashboard.js     # System initialization and status
-    │   ├── documents.js     # System initialization and status
-    │   ├── init.js     # System initialization and status
-    │   └── insights.js    # Fetch business insights
+    │   ├── dashboard.js    # API for dashboard data
+    │   ├── documents.js    # API for document-related operations
+    │   ├── init.js     # API for system initialization
+    │   ├── insights.js    # API for fetching business insights
+    │   └── pricing.js   # API for pricing strategy
     ├── public/
+    │   ├── favicon.svg
+    │   └── icons.svg
     ├── sample/   # Sample documents as input
-    │   └── balance.csv
-    │   └── company_description.txt
-    │   └── inventory.csv
+    │   ├── balance.csv
+    │   ├── company_description.txt
+    │   ├── inventory.csv
     │   └── sales.csv
     └── src/
         ├── App.css
@@ -301,11 +313,16 @@ LoCor_AI/
         ├── main.jsx
         ├── shared.css
         ├── assets/
+        │   ├── hero.png
+        │   ├── react.svg
+        │   └── vite.svg
         └── pages/
             ├── Chat.jsx      # Interactive AI business assistant interface
             ├── Dashboard.jsx    # Overview of business health and KPIs
             ├── Insights.css
             ├── Insights.jsx     # Detailed business strategy and market analysis view
+            ├── Pricing.jsx   # Pricing strategy interface
+            ├── PricingDetail.jsx # Detailed pricing view
             └── Upload.jsx    # File input interface
 ```
 
