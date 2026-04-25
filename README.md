@@ -2,6 +2,9 @@
 
 **LoCor AI** is an AI-powered business intelligence platform built for SMEs. Upload your sales sheets, inventory logs, and company description — and get actionable insights, competitive pricing strategies, automated Word/Excel reports, and a live AI consultant, all in one place.
 
+## Pitch and Demo Video
+https://drive.google.com/file/d/1CQdQgC7ZUQeQKsoEHTKNrVI-jJzJ-Aa-/view?usp=sharing
+
 ---
 
 ## 🌟 Key Features
